@@ -34,13 +34,14 @@
 
 ## WHAT IS THIS REPOSITORY FOR ?
 
-This repository contains a GameMaker Studio 2 project...
+This repository contains a GameMaker Studio 2 project. This project is effectively a constructor that allows you to
+easily create 2D grids on-the-fly.
 
 ---
 
 ## WHAT IS THE PURPOSE OF THIS PROJECT ?
 
-This purpose of this project is...
+To speed up future production time by providing a utility the is easily reusable.
 
 ---
 

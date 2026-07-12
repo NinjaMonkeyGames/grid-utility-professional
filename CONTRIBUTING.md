@@ -12,15 +12,16 @@ practices when working with an NinjaMonkeyGames project.
   - [5. Documentation \& Function Annotations](#5-documentation--function-annotations)
   - [6. Resource Management](#6-resource-management)
   - [7. Commit \& CI Rules](#7-commit--ci-rules)
+    - [PRINCIPLES](#principles)
+      - [1. The principle of defensive programming](#1-the-principle-of-defensive-programming)
+      - [2. The principle of modularity](#2-the-principle-of-modularity)
+      - [3. The principle of DRY code](#3-the-principle-of-dry-code)
+      - [4. The principle of human readable code](#4-the-principle-of-human-readable-code)
   - [USEFUL COMMANDS](#useful-commands)
     - [STAGE ALL CHANGES](#stage-all-changes)
     - [COMMIT CHANGES](#commit-changes)
     - [PUSH REFS](#push-refs)
-    - [BUILD DOCKER LOCALLY](#build-docker-locally)
-    - [CONFIRM DOCKER ENTRY POINT IS WORKING](#confirm-docker-entry-point-is-working)
-    - [BUILD AND PUSH TO REMOTE WITH ATTESTATIONS](#build-and-push-to-remote-with-attestations)
-    - [SCAN DOCKER FOR SECURITY ISSUES](#scan-docker-for-security-issues)
-    - [REMOVE ALL LOCAL BUILD IMAGES](#remove-all-local-build-images)
+    - [RESET WORKSPACE BACK TO LAST COMMIT](#reset-workspace-back-to-last-commit)
   - [CONTACT INFORMATION](#contact-information)
   - [COPYRIGHT](#copyright)
 
@@ -28,7 +29,7 @@ practices when working with an NinjaMonkeyGames project.
 
 ## 1. Naming Conventions
 
-- **Globals:** Must be declared in `UPPER_CASE`.
+- **Constants:** Must be declared in `UPPER_CASE`.
 - **Local Variables:** Must be `lower_case` and prefixed with an underscore (e.g., `_player_health`).
 - **Assets:** Must be in `snake_case` and prefixed with a prefix type code (e.g.,
 - `spr_player_idle`, `obj_enemy_boss`).
@@ -84,6 +85,8 @@ or calling functions inside larger expressions).
 ## 5. Documentation & Function Annotations
 
 - **JSDoc:** All functions must use the GameMaker JSDoc system for documentation.
+- **JSDoc Extended:** please use @since and @version JSDoc tags for functions even though GameMaker does not parse them
+  yet. It still helps with traceability and debugging.
 - **Annotations:** Explicitly mark functions with `@pure` or `@void` tags where applicable.
 - optimisation and code clarity.
 - Comment Philosophy: "Comments should explain the intent ('Why' this is done) rather than the mechanics
@@ -101,6 +104,30 @@ up in the corresponding CleanUp event. Always check if (ds_exists(_data, ds_type
 - **Commitlint** All commit messages must be conventional commits compliant. This is checked with commitlint but
 - You must also make sure all your commit messages are compliant.
 - You must ensure your spelling and grammar are correct both in documentation and in code comments.
+
+### PRINCIPLES
+
+#### 1. The principle of defensive programming
+
+- **All functions must be internally sanitised. This means they should be able to robustly handle any input
+  without causing an exception:**
+
+#### 2. The principle of modularity
+
+- **All code must be written with the view to reuse it. Code must be written in small discreet units.**
+
+#### 3. The principle of DRY code
+
+- **DON'T REPEAT YOURSELF.**
+  - DRY code is clean code.
+  - DRY code is fast code.
+  - DRY code is readable code.
+  - DRY code is efficient code.
+  - DRY code is happy code.
+
+#### 4. The principle of human readable code
+
+- **Micro optimisations should not come at the expense of clean human readable code.**
 
 ## USEFUL COMMANDS
 
@@ -122,38 +149,10 @@ git commit --file .git/COMMIT_EDITMSG
 git push .
 ```
 
-### BUILD DOCKER LOCALLY
+### RESET WORKSPACE BACK TO LAST COMMIT
 
 ```bash
-docker build -t markdownlint-cli2-ci .
-```
-
-### CONFIRM DOCKER ENTRY POINT IS WORKING
-
-```bash
-docker run --rm markdownlint-cli2-ci --version
-```
-
-### BUILD AND PUSH TO REMOTE WITH ATTESTATIONS
-
-```bash
-docker buildx build --platform linux/amd64,linux/arm64 
-  -t monkeyknuckles/markdownlint-cli2-ci:debug
-  --attest type=provenance,mode=max 
-  --attest type=sbom 
-  --push .
-```
-
-### SCAN DOCKER FOR SECURITY ISSUES
-
-```bash
-docker scout cves --only-fixed monkeyknuckles/markdownlint-cli2-ci:debug
-```
-
-### REMOVE ALL LOCAL BUILD IMAGES
-
-```bash
-docker system prune -a --volumes
+git reset --hard HEAD
 ```
 
 ## CONTACT INFORMATION
