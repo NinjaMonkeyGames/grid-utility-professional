@@ -1,0 +1,17 @@
+# Test if GameMaker Project can be compiled without error.
+
+name: gm-cli
+
+on:
+  workflow_call:
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    container:
+      image: monkeyknuckles/gm-cli
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run gm-cli
+        working-directory: ./grid-utility-professional
+        run: npx gm-cli compile
