@@ -63,20 +63,22 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	function set_grid()
 	{
         for (var _row = 0; _row < row_qty; ++_row) 
-		{
-			 for (var _column = 0; _column < column_qty; ++_column) 
-			{
-			    cell_data[_row][_column] =
-				{
-			        x1: x_offset + (_column * cell_width * x_scale),
-			        y1: y_offset + (_row* cell_height * y_scale),
-					x2 : x_offset + (_row * cell_width * x_scale) + cell_width * x_scale,
-					y2 : y_offset + (_column * cell_height * y_scale) + cell_height * y_scale,
-					
-					
-				}
-			}
-		}
+	    {
+	        for (var _column = 0; _column < column_qty; ++_column) 
+	        {
+	            cell_data[_row][_column] =
+	            {
+	                x1 : x_offset + (_column * cell_width * x_scale),
+	                x2 : x_offset + (_column * cell_width * x_scale) + (cell_width * x_scale),
+                
+	                y1 : y_offset + (_row    * cell_height * y_scale),
+	                y2 : y_offset + (_row    * cell_height * y_scale) + (cell_height * y_scale),
+                
+	                label_row_x : x_offset + (_column * cell_width * x_scale),
+	                label_row_y : y_offset + (_row    * cell_height * y_scale)
+	            }
+	        }
+	    }
     }
 		
 
@@ -116,6 +118,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 		{
 			 for (var _column = 0; _column < column_qty; ++_column) 
 			{
+				//draw_text(cell_data[_row][_column].label_row_x, cell_data[_row][_column].label_row_y, _column);
 				draw_rectangle(cell_data[_row][_column].x1, cell_data[_row][_column].y1, cell_data[_row][_column].x2, cell_data[_row][_column].y2, 1);
 			}
 		}
