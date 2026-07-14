@@ -22,6 +22,7 @@ practices when working with an NinjaMonkeyGames project.
     - [COMMIT CHANGES](#commit-changes)
     - [PUSH REFS](#push-refs)
     - [RESET WORKSPACE BACK TO LAST COMMIT](#reset-workspace-back-to-last-commit)
+  - [CODE SANITY CHECKS](#code-sanity-checks)
   - [CONTACT INFORMATION](#contact-information)
   - [COPYRIGHT](#copyright)
 
@@ -154,6 +155,12 @@ git push .
 ```bash
 git reset --hard HEAD
 ```
+
+## CODE SANITY CHECKS
+
+1. Are there any built-in GameMaker functions I can use to optimise this?
+2. Have I optimised for performance?
+3. Have I followed the design philosophy and coding rules.
 
 ## CONTACT INFORMATION
 

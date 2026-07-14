@@ -115,6 +115,15 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 		
 	}
 	
+	/// @function			get_row
+	/// @description								Gets the selected row coordinate.
+	/// @parameter		{Real}			 _x	Check row possition against X (mouse pointer by default).
+
+    static get_row = function(_x = mouse_x) 
+    {
+		return _x - x_offset / cell_width;
+	}
+	
 	/// @function			step
     /// @description	Execute step code for grid constructor instance.
 	
@@ -126,18 +135,21 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
     static draw = function() 
     {
 		draw_set_halign(fa_center);
-		draw_set_valign(fa_middle);
-		
-		for (var _row = 0; _row < row_qty; ++_row) 
-		{
-			 for (var _column = 0; _column < column_qty; ++_column) 
-			{
-				draw_text(cell_data[_row][_column].label_row_x, cell_data[_row][_column].label_row_y, cell_data[_row][_column].label_row_text);
-				draw_text(cell_data[_row][_column].label_column_x, cell_data[_row][_column].label_column_y, cell_data[_row][_column].label_column_text);
+	    draw_set_valign(fa_middle);
+    
+	    for (var _row = 0; _row < row_qty; ++_row) 
+	    {
+	        for (var _column = 0; _column < column_qty; ++_column) 
+	        {
+	            // Cache the reference: One lookup per cell
 				
-				draw_rectangle(cell_data[_row][_column].x1, cell_data[_row][_column].y1, cell_data[_row][_column].x2, cell_data[_row][_column].y2, true);
-			}
-		}
+	            var _cache_data = cell_data[_row][_column];
+            
+	            draw_text(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text);
+	            draw_text(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text);
+	            draw_rectangle(_cache_data.x1, _cache_data.y1, _cache_data.x2, _cache_data.y2, true);
+	        }
+	    }
 	}
 	
     array_push(global.grid_list, self); // Add copy of self to grid array.
