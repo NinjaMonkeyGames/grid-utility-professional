@@ -40,20 +40,20 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
 		/// @description Imported variables
 	
-        x_offset = _x_offset;
-        y_offset = _y_offset;
+        x_offset							= _x_offset;
+        y_offset							= _y_offset;
         
-		base_cell_width = _cell_width;
-		base_cell_height = _cell_height;
+		base_cell_width				= _cell_width;
+		base_cell_height			= _cell_height;
 		
-        cell_width = _cell_width;
-        cell_height = _cell_height;
+        cell_width						= _cell_width;
+        cell_height						= _cell_height;
         
-        row_qty  = _row_qty;
-        column_qty  = _column_qty;
+        row_qty							= _row_qty;
+        column_qty					= _column_qty;
         
-        text_colour = _text_colour;
-	    text_colour_selected = _text_colour_selected;
+        text_colour					= _text_colour;
+	    text_colour_selected		= _text_colour_selected;
     
 	set_grid();
 
@@ -73,10 +73,21 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
                 
 	                y1 : y_offset + (_row    * cell_height * y_scale),
 	                y2 : y_offset + (_row    * cell_height * y_scale) + (cell_height * y_scale),
-                
-	                label_row_x : x_offset + (_column * cell_width * x_scale),
-	                label_row_y : y_offset + (_row    * cell_height * y_scale)
-	            }
+					
+					label_row_x : x_offset + (_column * cell_width * x_scale) - 22 ,
+					label_row_y : y_offset + (_row    * cell_height * y_scale) + cell_height / 2,
+
+					label_column_x : x_offset + (_column * cell_width * x_scale) + cell_width / 2,
+					label_column_y : y_offset + (_row    * cell_height * y_scale) - 22 ,
+					
+					label_row_text : _row,
+					label_column_text : _column,
+				}
+				
+				//if 0 == 0 then cell_data[_row][_column].label_row_text_colour = c_white;
+				
+				if _row != 0 then cell_data[_row][_column].label_column_text = "";
+				if _column != 0 then cell_data[_row][_column].label_row_text = "";
 	        }
 	    }
     }
@@ -114,12 +125,17 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     static draw = function() 
     {
-		 for (var _row = 0; _row < row_qty; ++_row) 
+		draw_set_halign(fa_center);
+		draw_set_valign(fa_middle);
+		
+		for (var _row = 0; _row < row_qty; ++_row) 
 		{
 			 for (var _column = 0; _column < column_qty; ++_column) 
 			{
-				//draw_text(cell_data[_row][_column].label_row_x, cell_data[_row][_column].label_row_y, _column);
-				draw_rectangle(cell_data[_row][_column].x1, cell_data[_row][_column].y1, cell_data[_row][_column].x2, cell_data[_row][_column].y2, 1);
+				draw_text(cell_data[_row][_column].label_row_x, cell_data[_row][_column].label_row_y, cell_data[_row][_column].label_row_text);
+				draw_text(cell_data[_row][_column].label_column_x, cell_data[_row][_column].label_column_y, cell_data[_row][_column].label_column_text);
+				
+				draw_rectangle(cell_data[_row][_column].x1, cell_data[_row][_column].y1, cell_data[_row][_column].x2, cell_data[_row][_column].y2, true);
 			}
 		}
 	}
