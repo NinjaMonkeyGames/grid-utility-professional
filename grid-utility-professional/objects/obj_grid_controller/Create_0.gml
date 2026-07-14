@@ -83,13 +83,11 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 					label_row_text : _row,
 					label_column_text : _column,
 					
-					label_text_colour : c_white,
+					label_text_colour_x : c_white,
+					label_text_colour_y : c_white,
 				}
 				
-				if get_x() == _row
-				{
-					cell_data[_row][_column].label_text_colour = c_red;
-				}
+				//if select_x != undefined then cell_data[select_x - 1][0].label_text_colour = c_red;
 				
 				// Clear text from cells that are not on the edge.
 				
@@ -128,7 +126,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
     static get_x = function(_x = mouse_x) 
     {
-		return floor((_x - x_offset) / cell_width);
+		return clamp(floor((_x - x_offset) / cell_width), 0, column_qty - 1);
 	}
 	
 	/// @function			get_y
@@ -137,7 +135,26 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
     static get_y = function(_y = mouse_y) 
     {
-		return floor((_y - y_offset) / cell_height);
+		return clamp(floor((_y - y_offset) / cell_height), 0, row_qty - 1);
+	}
+	
+	/// @function			set_coords
+	/// @description								Sets the selected X coordinate.
+	/// @parameter		{Real}			 _x	Set row possition against X (mouse pointer by default).
+
+    static set_coords = function() 
+    {
+		var _select_x = get_x();
+		var _select_y = get_y();
+		
+		for (var _row = 0; _row < row_qty; ++_row) 
+	    {
+	        for (var _column = 0; _column < column_qty; ++_column) 
+	        {
+				cell_data[_row][_column].label_text_colour_x = (_row ==_select_y) ? text_colour_selected : text_colour;
+				cell_data[_row][_column].label_text_colour_y = (_column == _select_x) ? text_colour_selected : text_colour;
+			}
+		}
 	}
 	
 	/// @function			step
@@ -145,7 +162,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     static step = function() 
     {
-		show_debug_message(get_x())
+		set_coords();
 	}
 	
     static draw = function() 
@@ -160,9 +177,9 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	            // Cache the reference: One lookup per cell
 				
 	            var _cache_data = cell_data[_row][_column];
-            
-	            draw_text(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text);
-	            draw_text(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text);
+				
+	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, 1);
+	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, 1);
 	            draw_rectangle(_cache_data.x1, _cache_data.y1, _cache_data.x2, _cache_data.y2, true);
 	        }
 	    }
