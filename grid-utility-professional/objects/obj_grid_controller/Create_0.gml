@@ -82,9 +82,16 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 					
 					label_row_text : _row,
 					label_column_text : _column,
+					
+					label_text_colour : c_white,
 				}
 				
-				//if 0 == 0 then cell_data[_row][_column].label_row_text_colour = c_white;
+				if get_x() == _row
+				{
+					cell_data[_row][_column].label_text_colour = c_red;
+				}
+				
+				// Clear text from cells that are not on the edge.
 				
 				if _row != 0 then cell_data[_row][_column].label_column_text = "";
 				if _column != 0 then cell_data[_row][_column].label_row_text = "";
@@ -115,13 +122,22 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 		
 	}
 	
-	/// @function			get_row
-	/// @description								Gets the selected row coordinate.
+	/// @function			get_x
+	/// @description								Gets the selected X coordinate.
 	/// @parameter		{Real}			 _x	Check row possition against X (mouse pointer by default).
 
-    static get_row = function(_x = mouse_x) 
+    static get_x = function(_x = mouse_x) 
     {
-		return _x - x_offset / cell_width;
+		return floor((_x - x_offset) / cell_width);
+	}
+	
+	/// @function			get_y
+	/// @description								Gets the selected Y coordinate.
+	/// @parameter		{Real}			 _y	Check row possition against Y (mouse pointer by default).
+
+    static get_y = function(_y = mouse_y) 
+    {
+		return floor((_y - y_offset) / cell_height);
 	}
 	
 	/// @function			step
@@ -129,7 +145,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     static step = function() 
     {
-		
+		show_debug_message(get_x())
 	}
 	
     static draw = function() 
