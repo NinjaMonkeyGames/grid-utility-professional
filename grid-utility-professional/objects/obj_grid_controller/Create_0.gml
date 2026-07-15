@@ -37,7 +37,10 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
 	    x_scale = 1;
         y_scale = 1;
-	
+		
+		label_text_grid_gap_row = 6;
+		label_text_grid_gap_column = 12;
+		
 		/// @description Imported variables
 	
         x_offset							= _x_offset;
@@ -74,19 +77,31 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	                y1 : y_offset + (_row    * cell_height * y_scale),
 	                y2 : y_offset + (_row    * cell_height * y_scale) + (cell_height * y_scale),
 					
-					label_row_x : x_offset + (_column * cell_width * x_scale) - 22 ,
-					label_row_y : y_offset + (_row    * cell_height * y_scale) + cell_height / 2,
-
-					label_column_x : x_offset + (_column * cell_width * x_scale) + cell_width / 2,
-					label_column_y : y_offset + (_row    * cell_height * y_scale) - 22 ,
-					
 					label_row_text : _row,
 					label_column_text : _column,
 					
+					font_width : string_width(_row),
+					font_height : string_height(_column),
+					
+					// Left
+					
+					label_row_x : (x_offset + (_column * cell_width * x_scale) -  string_width(string(_row))) - label_text_grid_gap_column, // Horizontal
+					label_row_y : y_offset + (_row    * (cell_height * y_scale)) + cell_height / 2 - string_height(string(_column))  / 2 , // Vertical
+
+					// Top
+
+					label_column_x : x_offset + (_column * cell_width * x_scale) + cell_width / 2 - string_width(_column) / 2, // Horizontal					
+					label_column_y : (y_offset + (_row    * cell_height * y_scale) -  string_height(string(_row))) - label_text_grid_gap_row, // Vertical
+					
 					label_text_colour_x : c_white,
 					label_text_colour_y : c_white,
+					
+					label_text_x_alpha : 1,
+					label_text_y_alpha : 1,
+					
+					outline : true,
 				}
-				
+				//show_message(cell_height[_row][_column].font_width)
 				//if select_x != undefined then cell_data[select_x - 1][0].label_text_colour = c_red;
 				
 				// Clear text from cells that are not on the edge.
@@ -167,8 +182,8 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     static draw = function() 
     {
-		draw_set_halign(fa_center);
-	    draw_set_valign(fa_middle);
+		//draw_set_halign(fa_center);
+	    //draw_set_valign(fa_middle);
     
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
@@ -178,9 +193,10 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 				
 	            var _cache_data = cell_data[_row][_column];
 				
-	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, 1);
-	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, 1);
-	            draw_rectangle(_cache_data.x1, _cache_data.y1, _cache_data.x2, _cache_data.y2, true);
+	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
+	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
+	            
+				draw_rectangle(_cache_data.x1, _cache_data.y1, _cache_data.x2, _cache_data.y2, _cache_data.outline);
 	        }
 	    }
 	}
