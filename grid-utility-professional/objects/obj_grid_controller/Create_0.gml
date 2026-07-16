@@ -14,9 +14,9 @@ global.grid_list = []; // Stores array of grid structs
 
 #macro  LIMIT_ROW_QTY_MIN 0
 #macro  LIMIT_ROW_QTY_MAX 1024
+#macro  LIMIT_COLUMN_QTY_MIN 0
+#macro  LIMIT_COLUMN_QTY_MAX 1024
 
-// NOTE: column quantity limits reuse the row limits below, since no
-// dedicated LIMIT_COLUMN_QTY_MIN/MAX macros existed in the original script.
 // Add dedicated macros here if rows and columns should ever be bounded differently.
 
 /// @function grid()
@@ -38,38 +38,35 @@ global.grid_list = []; // Stores array of grid structs
 
 function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 64, _row_qty = 12, _column_qty = 16, _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, _label_text_type_row = true, _label_text_type_column = false)  constructor
 {
-		/// @description Calculation variables
+	/// @description Calculation variables
 	
-	    x_scale = 1;
-        y_scale = 1;
+	x_scale = 1;
+    y_scale = 1;
 		
-		x_shift = 1;
-		y_shift = 2;
+	x_shift = 1;
+	y_shift = 2;
 		
-		label_text_grid_gap_row = 6;
-		label_text_grid_gap_column = 12;
+	label_text_grid_gap_row = 6;
+	label_text_grid_gap_column = 12;
 		
-		/// @description Imported variables
+	/// @description Imported variables
 	
-        x_offset									= _x_offset;
-        y_offset									= _y_offset;
-        
-		base_cell_width						= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
-		base_cell_height					= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
+    x_offset									= _x_offset;
+    y_offset									= _y_offset;
 		
-        cell_width								= base_cell_width;
-        cell_height								= base_cell_height;
+    cell_width								= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
+    cell_height								= clamp(_cell_height, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_HEIGHT_MAX);
         
-        row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-        column_qty							= clamp(_column_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+    row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+    column_qty							= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
         
-        text_colour							= _text_colour;
-	    text_colour_selected				= _text_colour_selected;
+    text_colour							= _text_colour;
+	text_colour_selected				= _text_colour_selected;
 		
-		label_text_type_row				= _label_text_type_row;
-		label_text_type_column		= _label_text_type_column;
+	label_text_type_row				= _label_text_type_row;
+	label_text_type_column		= _label_text_type_column;
 		
-		cell_data = [];
+	cell_data = [];
     
 	set_grid();
 
@@ -86,34 +83,36 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	        {
 	            // Cache the label values
 
-	            var _row_str    = label_text_type_row    ? spt_convert_letters(_row + y_shift)    : string(_row + y_shift);
-	            var _column_str    = label_text_type_column ? spt_convert_letters(_column + x_shift) : string(_column + x_shift);
+	            var _row_string			= label_text_type_row			? spt_convert_letters(_row		+ y_shift)	: string(_row		+ y_shift);
+	            var _column_string   = label_text_type_column	? spt_convert_letters(_column	+ x_shift)	: string(_column + x_shift);
             
 	            // Calculate coordinates
 				
-	            var _x_pos = x_offset + (_column * cell_width * x_scale);
-	            var _y_pos = y_offset + (_row    * cell_height * y_scale);
-
+	            var _x_pos = x_offset + (_column	* cell_width	* x_scale);
+	            var _y_pos = y_offset + (_row			* cell_height	* y_scale);
+				
+				// Store cell data
+				
 	            cell_data[_row][_column] =
 	            {
 	                x1 : _x_pos,
-	                x2 : _x_pos + (cell_width * x_scale),
+	                x2 : _x_pos + (cell_width	* x_scale),
 	                y1 : _y_pos,
-	                y2 : _y_pos + (cell_height * y_scale),
+	                y2 : _y_pos + (cell_height	* y_scale),
                 
-	                label_row_text    : _row_str,
-	                label_column_text : _column_str,
+	                label_row_text		: _row_string,
+	                label_column_text : _column_string,
                 
-	                // Left
+	                // Left label
 					
-	                label_row_x : (_x_pos - string_width(_row_str)) - label_text_grid_gap_column,
-	                label_row_y : _y_pos + (cell_height * y_scale) / 2 - string_height(_column_str) / 2,
+	                label_row_x : (_x_pos - string_width(_row_string)) - label_text_grid_gap_column,
+	                label_row_y : _y_pos + (cell_height * y_scale) / 2 - string_height(_column_string) / 2,
 
-	                // Top
+	                // Top label
 					
-	                label_column_x : _x_pos + (cell_width * x_scale) / 2 - string_width(_column_str) / 2,
-	                label_column_y : (_y_pos - string_height(_row_str)) - label_text_grid_gap_row,
-                
+	                label_column_x : _x_pos + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
+	                label_column_y : (_y_pos - string_height(_row_string)) - label_text_grid_gap_row,
+					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
 					
@@ -170,6 +169,15 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 		return clamp(floor((_y - y_offset) / (cell_height * y_scale)), 0, row_qty - 1);
 	}
 	
+	/// @function												shift_x
+	/// @description										Shift row.
+	/// @parm				{Real}			_value		Shift row. (Negative values shift left)
+
+    static shift_x = function(_value) 
+    {
+		
+	}
+	
 	/// @function										set_coords
 	/// @description								Sets the selected X coordinate.
 	/// @parm		{Real}					_x	Set row possition against X (mouse pointer by default).
@@ -195,6 +203,20 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
     static step = function() 
     {
 		set_coords();
+		
+		if mouse_wheel_down()
+		{
+			x_scale -= 0.1;
+			y_scale -= 0.1;
+			set_grid();
+		}
+				
+		if mouse_wheel_up()
+		{
+			x_scale += 0.1;
+			y_scale += 0.1;
+			set_grid();
+		}
 	}
 	
     static draw = function() 
@@ -203,8 +225,6 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-	            // Cache the reference: One lookup per cell
-				
 	            var _cache_data = cell_data[_row][_column];
 				
 	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);

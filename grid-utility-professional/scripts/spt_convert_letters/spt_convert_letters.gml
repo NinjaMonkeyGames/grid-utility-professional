@@ -1,7 +1,7 @@
 /// @function spt_convert_letters()
 /// @description											Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
 /// @param               _number		{Real}      The number to convert to a letter(s).
-/// @param               _type		{Real}      The number to convert to a letter(s).
+/// @param               _type			{Real}      The number to convert to a letter(s).
 /// @return									{String}   Return letter.
 /// @pure
 
@@ -15,14 +15,14 @@ function spt_convert_letters(_number)
 	
 	if _number > 0 then _num ++;
 
-    var _str = "";
+    var _string = "";
 	
     while (_num > 0)
     {
         _num -= 1; 
-        _str = chr((_num mod 26) + 65) + _str;
+        _string = chr((_num mod 26) + 65) + _string;
         _num = _num div 26;
     }
 
-    return _prefix + (_str == "" ? "A" : _str);
+    return _prefix + (_string == "" ? "A" : _string);
 }
