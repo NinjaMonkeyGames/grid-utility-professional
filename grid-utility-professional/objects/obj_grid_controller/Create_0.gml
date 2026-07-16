@@ -17,46 +17,54 @@ global.grid_list = []; // Stores array of grid structs
 
 /// @function grid()
 /// @constructor
-/// @description																					   Generates a 2D grid based on parameters.
-/// @since																								    v0.1.0.
-/// @version																							    v0.1.0.
-/// @parameter {Real}							    _x_offset								The horizontal starting position (origin) top-left.
-/// @parameter {Real}							    _y_offset								The vertical starting position (origin) of the grid within the coordinate space.
-/// @parameter {Real}							    _cell_width								The width of an individual grid cell in pixels or units. 
-/// @parameter {Real}							    _cell_height							The height of an individual grid cell in pixels or units.
-/// @parameter {Real}							    _row_qty								Total number of rows defined in the grid.
-/// @parameter {Real}							    _column_qty							Total number of columns defined in the grid.
-/// @parameter {Constant.Colour}			_grid_colour							Default label text colour.
-/// @parameter {Constant.Colour}			_text_colour							Default label text colour.
-/// @parameter {Constant.Colour}			_text_colour_selected			Selected label text colour.
-/// @returns {Struct}							                                                    A new grid struct.					
+/// @description																					Generates a 2D grid based on parameters.
+/// @since																							    v0.1.0.
+/// @version																							v0.1.0.
+/// @param {Real}							    _x_offset								The horizontal starting position (origin) top-left.
+/// @param {Real}							    _y_offset								The vertical starting position (origin) of the grid within the coordinate space.
+/// @param {Real}							    _cell_width								The width of an individual grid cell in pixels or units. 
+/// @param {Real}							    _cell_height							The height of an individual grid cell in pixels or units.
+/// @param {Real}							    _row_qty								Total number of rows defined in the grid.
+/// @param {Real}							    _column_qty							Total number of columns defined in the grid.
+/// @param {bool}								_label_text_type_row			Determine if row label text should be represented as numbers or letters.
+/// @param {bool}								_label_text_type_column		Determine if column label text should be represented as numbers or letters.
+/// @param {Constant.Colour}			_grid_colour							Default label text colour.
+/// @param {Constant.Colour}			_text_colour							Default label text colour.
+/// @param {Constant.Colour}			_text_colour_selected			Selected label text colour.
+/// @returns {Struct}							                                                A new grid struct.					
 
-function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 64, _row_qty = 12, _column_qty = 16, _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red)  constructor
+function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 64, _row_qty = 12, _column_qty = 16, _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, _label_text_type_row = true, _label_text_type_column = false)  constructor
 {
 		/// @description Calculation variables
 	
 	    x_scale = 1;
         y_scale = 1;
 		
+		x_shift = 1;
+		y_shift = 2;
+		
 		label_text_grid_gap_row = 6;
 		label_text_grid_gap_column = 12;
 		
 		/// @description Imported variables
 	
-        x_offset							= _x_offset;
-        y_offset							= _y_offset;
+        x_offset									= _x_offset;
+        y_offset									= _y_offset;
         
-		base_cell_width				= _cell_width;
-		base_cell_height			= _cell_height;
+		base_cell_width						= _cell_width;
+		base_cell_height					= _cell_height;
 		
-        cell_width						= _cell_width;
-        cell_height						= _cell_height;
+        cell_width								= _cell_width;
+        cell_height								= _cell_height;
         
-        row_qty							= _row_qty;
-        column_qty					= _column_qty;
+        row_qty									= _row_qty;
+        column_qty							= _column_qty;
         
-        text_colour					= _text_colour;
-	    text_colour_selected		= _text_colour_selected;
+        text_colour							= _text_colour;
+	    text_colour_selected				= _text_colour_selected;
+		
+		label_text_type_row				= _label_text_type_row;
+		label_text_type_column		= _label_text_type_column;
     
 	set_grid();
 
@@ -65,54 +73,53 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
 	function set_grid()
 	{
-        for (var _row = 0; _row < row_qty; ++_row) 
+	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
+	            // Cache the label values
+				
+	            var _row_str    = label_text_type_row    ? spt_convert_letters(_row + x_shift)    : string(_row + x_shift);
+	            var _column_str    = label_text_type_column ? spt_convert_letters(_column + y_shift) : string(_column + y_shift);
+            
+	            // Calculate coordinates
+				
+	            var _x_pos = x_offset + (_column * cell_width * x_scale);
+	            var _y_pos = y_offset + (_row    * cell_height * y_scale);
+
 	            cell_data[_row][_column] =
 	            {
-	                x1 : x_offset + (_column * cell_width * x_scale),
-	                x2 : x_offset + (_column * cell_width * x_scale) + (cell_width * x_scale),
+	                x1 : _x_pos,
+	                x2 : _x_pos + (cell_width * x_scale),
+	                y1 : _y_pos,
+	                y2 : _y_pos + (cell_height * y_scale),
                 
-	                y1 : y_offset + (_row    * cell_height * y_scale),
-	                y2 : y_offset + (_row    * cell_height * y_scale) + (cell_height * y_scale),
+	                label_row_text    : _row_str,
+	                label_column_text : _column_str,
+                
+	                // Left
 					
-					label_row_text : _row,
-					label_column_text : _column,
-					
-					font_width : string_width(_row),
-					font_height : string_height(_column),
-					
-					// Left
-					
-					label_row_x : (x_offset + (_column * cell_width * x_scale) -  string_width(string(_row))) - label_text_grid_gap_column, // Horizontal
-					label_row_y : y_offset + (_row    * (cell_height * y_scale)) + cell_height / 2 - string_height(string(_column))  / 2 , // Vertical
+	                label_row_x : (_x_pos - string_width(_row_str)) - label_text_grid_gap_column,
+	                label_row_y : _y_pos + (cell_height * y_scale) / 2 - string_height(_column_str) / 2,
 
-					// Top
-
-					label_column_x : x_offset + (_column * cell_width * x_scale) + cell_width / 2 - string_width(_column) / 2, // Horizontal					
-					label_column_y : (y_offset + (_row    * cell_height * y_scale) -  string_height(string(_row))) - label_text_grid_gap_row, // Vertical
+	                // Top
 					
-					label_text_colour_x : c_white,
-					label_text_colour_y : c_white,
-					
-					label_text_x_alpha : 1,
-					label_text_y_alpha : 1,
-					
-					outline : true,
-				}
-				//show_message(cell_height[_row][_column].font_width)
-				//if select_x != undefined then cell_data[select_x - 1][0].label_text_colour = c_red;
-				
-				// Clear text from cells that are not on the edge.
-				
-				if _row != 0 then cell_data[_row][_column].label_column_text = "";
-				if _column != 0 then cell_data[_row][_column].label_row_text = "";
+	                label_column_x : _x_pos + (cell_width * x_scale) / 2 - string_width(_column_str) / 2,
+	                label_column_y : (_y_pos - string_height(_row_str)) - label_text_grid_gap_row,
+                
+	                label_text_colour_x : c_white,
+	                label_text_colour_y : c_white,
+	                label_text_x_alpha  : 1,
+	                label_text_y_alpha  : 1,
+	                outline : true
+	            };
+            
+	            // Clear text from cells not on the edge
+	            if (_row != 0)    cell_data[_row][_column].label_column_text = "";
+	            if (_column != 0) cell_data[_row][_column].label_row_text    = "";
 	        }
 	    }
-    }
-		
-
+	}
 	
 	/// @function destroy()
 	/// @description Cleans up the instance from the global list and clears data
@@ -137,25 +144,25 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
 	/// @function			get_x
 	/// @description								Gets the selected X coordinate.
-	/// @parameter		{Real}			 _x	Check row possition against X (mouse pointer by default).
+	/// @parm				{Real}			 _x	Check row possition against X (mouse pointer by default).
 
     static get_x = function(_x = mouse_x) 
     {
 		return clamp(floor((_x - x_offset) / cell_width), 0, column_qty - 1);
 	}
 	
-	/// @function			get_y
-	/// @description								Gets the selected Y coordinate.
-	/// @parameter		{Real}			 _y	Check row possition against Y (mouse pointer by default).
+	/// @function								get_y
+	/// @description						Gets the selected Y coordinate.
+	/// @parm				{Real}			_y	Check row possition against Y (mouse pointer by default).
 
     static get_y = function(_y = mouse_y) 
     {
 		return clamp(floor((_y - y_offset) / cell_height), 0, row_qty - 1);
 	}
 	
-	/// @function			set_coords
+	/// @function										set_coords
 	/// @description								Sets the selected X coordinate.
-	/// @parameter		{Real}			 _x	Set row possition against X (mouse pointer by default).
+	/// @parm		{Real}					_x	Set row possition against X (mouse pointer by default).
 
     static set_coords = function() 
     {

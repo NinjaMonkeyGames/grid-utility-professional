@@ -21,6 +21,7 @@
   "resources":[
     {"id":{"name":"obj_grid_controller","path":"objects/obj_grid_controller/obj_grid_controller.yy",},},
     {"id":{"name":"rm_main","path":"rooms/rm_main/rm_main.yy",},},
+    {"id":{"name":"spt_convert_letters","path":"scripts/spt_convert_letters/spt_convert_letters.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
