@@ -17,6 +17,11 @@ global.grid_list = []; // Stores array of grid structs
 #macro  LIMIT_COLUMN_QTY_MIN 0
 #macro  LIMIT_COLUMN_QTY_MAX 1024
 
+#macro LIMIT_ROW_SHIFT_MIN -9999
+#macro LIMIT_ROW_SHIFT_MAX 9999
+#macro LIMIT_COLUMN_SHIFT_MIN -9999
+#macro LIMIT_COLUMN_SHIFT_MAX 9999
+
 // Add dedicated macros here if rows and columns should ever be bounded differently.
 
 /// @function grid()
@@ -36,7 +41,14 @@ global.grid_list = []; // Stores array of grid structs
 /// @param {Constant.Colour}			_text_colour_selected			Selected label text colour.
 /// @returns {Struct}							                                                A new grid struct.					
 
-function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 64, _row_qty = 12, _column_qty = 16, _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, _label_text_type_row = true, _label_text_type_column = false)  constructor
+function grid
+(
+_x_offset = 64, _y_offset = 32, 
+_cell_width = 32, _cell_height = 32, 
+_row_qty = 12, _column_qty = 16, 
+_grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
+_label_text_type_row = false, _label_text_type_column = false
+)  constructor
 {
 	/// @description Calculation variables
 	
@@ -44,7 +56,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
     y_scale = 1;
 		
 	x_shift = 1;
-	y_shift = 2;
+	y_shift = 1;
 		
 	label_text_grid_gap_row = 6;
 	label_text_grid_gap_column = 12;
@@ -175,7 +187,24 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
     static shift_x = function(_value) 
     {
+	    var _row_shift = _value - row_qty
+
+	    x_shift = clamp(_row_shift, LIMIT_ROW_SHIFT_MIN , LIMIT_ROW_SHIFT_MAX - ( column_qty - 1));
 		
+		set_grid();
+	}
+	
+	/// @function												shift_y
+	/// @description										Shift column.
+	/// @parm				{Real}			_value		Shift column. (Negative values shift up)
+
+    static shift_y = function(_value) 
+    {
+	    var _column_shift = _value - column_qty
+
+	    y_shift = clamp(_column_shift, LIMIT_COLUMN_SHIFT_MIN , LIMIT_COLUMN_SHIFT_MAX - ( row_qty - 1));
+		
+		set_grid();
 	}
 	
 	/// @function										set_coords
@@ -206,16 +235,14 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 		
 		if mouse_wheel_down()
 		{
-			x_scale -= 0.1;
-			y_scale -= 0.1;
-			set_grid();
+			shift_x(1000000);
+			shift_y(1000000);
 		}
 				
 		if mouse_wheel_up()
 		{
-			x_scale += 0.1;
-			y_scale += 0.1;
-			set_grid();
+			shift_x(-10000000);
+			shift_y(-100000000);
 		}
 	}
 	
