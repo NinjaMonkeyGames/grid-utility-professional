@@ -15,11 +15,14 @@ global.grid_list = []; // Stores array of grid structs
 #macro  LIMIT_ROW_QTY_MIN 0
 #macro  LIMIT_ROW_QTY_MAX 1024
 
+// NOTE: column quantity limits reuse the row limits below, since no
+// dedicated LIMIT_COLUMN_QTY_MIN/MAX macros existed in the original script.
+// Add dedicated macros here if rows and columns should ever be bounded differently.
+
 /// @function grid()
 /// @constructor
 /// @description																					Generates a 2D grid based on parameters.
 /// @since																							    v0.1.0.
-/// @version																							v0.1.0.
 /// @param {Real}							    _x_offset								The horizontal starting position (origin) top-left.
 /// @param {Real}							    _y_offset								The vertical starting position (origin) of the grid within the coordinate space.
 /// @param {Real}							    _cell_width								The width of an individual grid cell in pixels or units. 
@@ -51,20 +54,22 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
         x_offset									= _x_offset;
         y_offset									= _y_offset;
         
-		base_cell_width						= _cell_width;
-		base_cell_height					= _cell_height;
+		base_cell_width						= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
+		base_cell_height					= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
 		
-        cell_width								= _cell_width;
-        cell_height								= _cell_height;
+        cell_width								= base_cell_width;
+        cell_height								= base_cell_height;
         
-        row_qty									= _row_qty;
-        column_qty							= _column_qty;
+        row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+        column_qty							= clamp(_column_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
         
         text_colour							= _text_colour;
 	    text_colour_selected				= _text_colour_selected;
 		
 		label_text_type_row				= _label_text_type_row;
 		label_text_type_column		= _label_text_type_column;
+		
+		cell_data = [];
     
 	set_grid();
 
@@ -73,14 +78,16 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
 	function set_grid()
 	{
+		cell_data = [];
+		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
 	            // Cache the label values
-				
-	            var _row_str    = label_text_type_row    ? spt_convert_letters(_row + x_shift)    : string(_row + x_shift);
-	            var _column_str    = label_text_type_column ? spt_convert_letters(_column + y_shift) : string(_column + y_shift);
+
+	            var _row_str    = label_text_type_row    ? spt_convert_letters(_row + y_shift)    : string(_row + y_shift);
+	            var _column_str    = label_text_type_column ? spt_convert_letters(_column + x_shift) : string(_column + x_shift);
             
 	            // Calculate coordinates
 				
@@ -109,12 +116,15 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
                 
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
+					
 	                label_text_x_alpha  : 1,
 	                label_text_y_alpha  : 1,
+					
 	                outline : true
 	            };
             
 	            // Clear text from cells not on the edge
+				
 	            if (_row != 0)    cell_data[_row][_column].label_column_text = "";
 	            if (_column != 0) cell_data[_row][_column].label_row_text    = "";
 	        }
@@ -128,17 +138,17 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	{
 	    // Find the current instance's index in the global array
 		
-	    //var _index = array_get_index(global.grid_list, self);
+	    var _index = array_get_index(global.grid_list, self);
     
 	    // Only remove if it actually exists in the array
 		
-	   // if (_index != -1)  { array_delete(global.grid_list, _index, 1)};
+	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
     
-	    //cell_data = undefined; // Clear cell data
+	    cell_data = undefined; // Clear cell data
 	
 	    // Mark as destroyed so any lingering references can check before use
 		
-	   // is_destroyed = true;
+	    is_destroyed = true;
 		
 	}
 	
@@ -148,7 +158,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
     static get_x = function(_x = mouse_x) 
     {
-		return clamp(floor((_x - x_offset) / cell_width), 0, column_qty - 1);
+		return clamp(floor((_x - x_offset) / (cell_width * x_scale)), 0, column_qty - 1);
 	}
 	
 	/// @function								get_y
@@ -157,7 +167,7 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 
     static get_y = function(_y = mouse_y) 
     {
-		return clamp(floor((_y - y_offset) / cell_height), 0, row_qty - 1);
+		return clamp(floor((_y - y_offset) / (cell_height * y_scale)), 0, row_qty - 1);
 	}
 	
 	/// @function										set_coords
@@ -189,9 +199,6 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     static draw = function() 
     {
-		//draw_set_halign(fa_center);
-	    //draw_set_valign(fa_middle);
-    
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -210,4 +217,3 @@ function grid(_x_offset = 32, _y_offset = 32, _cell_width = 64, _cell_height = 6
 	
     array_push(global.grid_list, self); // Add copy of self to grid array.
 }
-
