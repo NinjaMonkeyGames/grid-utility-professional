@@ -4,6 +4,9 @@
 
 global.grid_list = []; // Stores array of grid structs
 
+global.last_mouse_x = mouse_x;
+global.last_mouse_y = mouse_y;
+
 /// @enum
 
 
@@ -28,17 +31,17 @@ global.grid_list = []; // Stores array of grid structs
 /// @constructor
 /// @description																					Generates a 2D grid based on parameters.
 /// @since																							    v0.1.0.
-/// @param {Real}							    _x_offset								The horizontal starting position (origin) top-left.
-/// @param {Real}							    _y_offset								The vertical starting position (origin) of the grid within the coordinate space.
-/// @param {Real}							    _cell_width								The width of an individual grid cell in pixels or units. 
-/// @param {Real}							    _cell_height							The height of an individual grid cell in pixels or units.
-/// @param {Real}							    _row_qty								Total number of rows defined in the grid.
-/// @param {Real}							    _column_qty							Total number of columns defined in the grid.
-/// @param {bool}								_label_text_type_row			Determine if row label text should be represented as numbers or letters.
-/// @param {bool}								_label_text_type_column		Determine if column label text should be represented as numbers or letters.
-/// @param {Constant.Colour}			_grid_colour							Default label text colour.
-/// @param {Constant.Colour}			_text_colour							Default label text colour.
-/// @param {Constant.Colour}			_text_colour_selected			Selected label text colour.
+/// @param {Real}							    [_x_offset]								The horizontal starting position (origin) top-left.
+/// @param {Real}							    [_y_offset]								The vertical starting position (origin) of the grid within the coordinate space.
+/// @param {Real}							    [_cell_width]							The width of an individual grid cell in pixels or units. 
+/// @param {Real}							    [_cell_height]							The height of an individual grid cell in pixels or units.
+/// @param {Real}							    [_row_qty]								Total number of rows defined in the grid.
+/// @param {Real}								[_column_qty]						Total number of columns defined in the grid.
+/// @param {bool}								[_label_text_type_row]			Determine if row label text should be represented as numbers or letters.
+/// @param {bool}								[_label_text_type_column]	Determine if column label text should be represented as numbers or letters.
+/// @param {Constant.Colour}			[_grid_colour]						Default label text colour.
+/// @param {Constant.Colour}			[_text_colour]						Default label text colour.
+/// @param {Constant.Colour}			[_text_colour_selected]		Selected label text colour.
 /// @returns {Struct}							                                                A new grid struct.					
 
 function grid
@@ -47,7 +50,7 @@ _x_offset = 64, _y_offset = 32,
 _cell_width = 32, _cell_height = 32, 
 _row_qty = 12, _column_qty = 16, 
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
-_label_text_type_row = false, _label_text_type_column = false
+_label_text_type_row = false, _label_text_type_column = true
 )  constructor
 {
 	/// @description Calculation variables
@@ -60,6 +63,9 @@ _label_text_type_row = false, _label_text_type_column = false
 		
 	label_text_grid_gap_row = 6;
 	label_text_grid_gap_column = 12;
+	
+	mouse_x_last = mouse_x;
+	mouse_y_last = mouse_y;
 		
 	/// @description Imported variables
 	
@@ -165,16 +171,16 @@ _label_text_type_row = false, _label_text_type_column = false
 	
 	/// @function			get_x
 	/// @description								Gets the selected X coordinate.
-	/// @parm				{Real}			 _x	Check row possition against X (mouse pointer by default).
+	/// @parm				{Real}		 [_x]	Check row possition against X (mouse pointer by default).
 
     static get_x = function(_x = mouse_x) 
     {
 		return clamp(floor((_x - x_offset) / (cell_width * x_scale)), 0, column_qty - 1);
 	}
 	
-	/// @function								get_y
-	/// @description						Gets the selected Y coordinate.
-	/// @parm				{Real}			_y	Check row possition against Y (mouse pointer by default).
+	/// @function										get_y
+	/// @description								Gets the selected Y coordinate.
+	/// @parm				{Real}		[_y]		Check row possition against Y (mouse pointer by default).
 
     static get_y = function(_y = mouse_y) 
     {
@@ -213,6 +219,8 @@ _label_text_type_row = false, _label_text_type_column = false
 
     static set_coords = function() 
     {
+		show_debug_message("set");
+		
 		var _select_x = get_x();
 		var _select_y = get_y();
 		
@@ -226,26 +234,32 @@ _label_text_type_row = false, _label_text_type_column = false
 		}
 	}
 	
+	/// @function																detect_change
+	/// @description														Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
+	/// @param               [_mouse]				{Bool}			Set this if you want to check mouse movement.
+	/// @param               [_keyboard]		{Bool}			Set this if you want to check keyboard activity.
+	/// @return											{Bool}			Return true of state has changed and false if it has not.
+	/// @pure
+
+	static detect_change = function(_mouse = true, _keyboard = true)
+	{
+		if _mouse == true 
+		{
+			if mouse_x != global.last_mouse_x || mouse_y != global.last_mouse_y then return true;
+		}
+		
+		return (_keyboard == true) ? keyboard_check(vk_anykey) : false;
+		return false;
+	}
+
 	/// @function			step
     /// @description	Execute step code for grid constructor instance.
 	
     static step = function() 
     {
-		set_coords();
-		
-		if mouse_wheel_down()
-		{
-			shift_x(1000000);
-			shift_y(1000000);
-		}
-				
-		if mouse_wheel_up()
-		{
-			shift_x(-10000000);
-			shift_y(-100000000);
-		}
+		if  detect_change() == true then set_coords();
 	}
-	
+				
     static draw = function() 
     {
 	    for (var _row = 0; _row < row_qty; ++_row) 

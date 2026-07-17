@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"spt_convert_letters",
+  "%Name":"spt_pure_functions",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"spt_convert_letters",
+  "name":"spt_pure_functions",
   "parent":{
     "name":"grid-utility-professional",
     "path":"grid-utility-professional.yyp",
