@@ -63,9 +63,13 @@ _label_text_type_row = false, _label_text_type_column = true
 		
 	label_text_grid_gap_row = 6;
 	label_text_grid_gap_column = 12;
-	
-	mouse_x_last = mouse_x;
-	mouse_y_last = mouse_y;
+
+	// FIX: removed unused mouse_x_last / mouse_y_last instance fields.
+	// They were written once at construction and never read or updated
+	// anywhere else - dead state. Mouse-change tracking is handled via
+	// global.last_mouse_x / global.last_mouse_y instead (see step()).
+
+	is_destroyed = false; // FIX: initialise explicitly so it's never undefined before destroy() is called
 		
 	/// @description Imported variables
 	
@@ -73,7 +77,7 @@ _label_text_type_row = false, _label_text_type_column = true
     y_offset									= _y_offset;
 		
     cell_width								= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
-    cell_height								= clamp(_cell_height, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_HEIGHT_MAX);
+    cell_height								= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX); // FIX: was clamping against LIMIT_CELL_WIDTH_MIN
         
     row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
     column_qty							= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
@@ -188,39 +192,41 @@ _label_text_type_row = false, _label_text_type_column = true
 	}
 	
 	/// @function												shift_x
-	/// @description										Shift row.
-	/// @parm				{Real}			_value		Shift row. (Negative values shift left)
+	/// @description										Shift columns. (Negative values shift left)
+	/// @parm				{Real}			_value		New column shift value.
 
+	// FIX: shift_x controls x_shift, which is added to the *column* index
+	// (_column + x_shift in set_grid()). The original implementation used
+	// row_qty and LIMIT_ROW_SHIFT_* here, which meant shift_x was actually
+	// bounded/scaled by row data instead of column data. It now consistently
+	// uses column_qty and LIMIT_COLUMN_SHIFT_*.
     static shift_x = function(_value) 
     {
-	    var _row_shift = _value - row_qty
+	    var _column_shift = _value - column_qty;
 
-	    x_shift = clamp(_row_shift, LIMIT_ROW_SHIFT_MIN , LIMIT_ROW_SHIFT_MAX - ( column_qty - 1));
+	    x_shift = clamp(_column_shift, LIMIT_COLUMN_SHIFT_MIN, LIMIT_COLUMN_SHIFT_MAX - (column_qty - 1));
 		
 		set_grid();
 	}
 	
 	/// @function												shift_y
-	/// @description										Shift column.
-	/// @parm				{Real}			_value		Shift column. (Negative values shift up)
-
+	/// @description										Shift rows. (Negative values shift up)
+	/// @parm				{Real}			_value		New row shift value.
+	
     static shift_y = function(_value) 
     {
-	    var _column_shift = _value - column_qty
+	    var _row_shift = _value - row_qty;
 
-	    y_shift = clamp(_column_shift, LIMIT_COLUMN_SHIFT_MIN , LIMIT_COLUMN_SHIFT_MAX - ( row_qty - 1));
+	    y_shift = clamp(_row_shift, LIMIT_ROW_SHIFT_MIN, LIMIT_ROW_SHIFT_MAX - (row_qty - 1));
 		
 		set_grid();
 	}
 	
 	/// @function										set_coords
-	/// @description								Sets the selected X coordinate.
-	/// @parm		{Real}					_x	Set row possition against X (mouse pointer by default).
+	/// @description								Highlights the row/column label under the given (or mouse) position.
 
     static set_coords = function() 
     {
-		show_debug_message("set");
-		
 		var _select_x = get_x();
 		var _select_y = get_y();
 		
@@ -235,21 +241,20 @@ _label_text_type_row = false, _label_text_type_column = true
 	}
 	
 	/// @function																detect_change
-	/// @description														Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
+	/// @description														Checks whether the mouse has moved and/or a key is being pressed since the last check.
 	/// @param               [_mouse]				{Bool}			Set this if you want to check mouse movement.
 	/// @param               [_keyboard]		{Bool}			Set this if you want to check keyboard activity.
-	/// @return											{Bool}			Return true of state has changed and false if it has not.
+	/// @return											{Bool}			Returns true if state has changed and false if it has not.
 	/// @pure
 
 	static detect_change = function(_mouse = true, _keyboard = true)
 	{
-		if _mouse == true 
+		if (_mouse == true)
 		{
-			if mouse_x != global.last_mouse_x || mouse_y != global.last_mouse_y then return true;
+			if (mouse_x != global.last_mouse_x || mouse_y != global.last_mouse_y) { return true; }
 		}
 		
 		return (_keyboard == true) ? keyboard_check(vk_anykey) : false;
-		return false;
 	}
 
 	/// @function			step
@@ -257,7 +262,7 @@ _label_text_type_row = false, _label_text_type_column = true
 	
     static step = function() 
     {
-		if  detect_change() == true then set_coords();
+		if (detect_change() == true) { set_coords(); }
 	}
 				
     static draw = function() 
