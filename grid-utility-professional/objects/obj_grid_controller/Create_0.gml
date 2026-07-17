@@ -47,10 +47,10 @@ global.last_mouse_y = mouse_y;
 function grid
 (
 _x_offset = 64, _y_offset = 32, 
-_cell_width = 32, _cell_height = 32, 
+_cell_width = 64, _cell_height = 64, 
 _row_qty = 12, _column_qty = 16, 
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
-_label_text_type_row = false, _label_text_type_column = true
+_label_text_type_row = false, _label_text_type_column = false
 )  constructor
 {
 	/// @description Calculation variables
@@ -64,12 +64,7 @@ _label_text_type_row = false, _label_text_type_column = true
 	label_text_grid_gap_row = 6;
 	label_text_grid_gap_column = 12;
 
-	// FIX: removed unused mouse_x_last / mouse_y_last instance fields.
-	// They were written once at construction and never read or updated
-	// anywhere else - dead state. Mouse-change tracking is handled via
-	// global.last_mouse_x / global.last_mouse_y instead (see step()).
-
-	is_destroyed = false; // FIX: initialise explicitly so it's never undefined before destroy() is called
+	is_destroyed = false; 
 		
 	/// @description Imported variables
 	
@@ -195,17 +190,9 @@ _label_text_type_row = false, _label_text_type_column = true
 	/// @description										Shift columns. (Negative values shift left)
 	/// @parm				{Real}			_value		New column shift value.
 
-	// FIX: shift_x controls x_shift, which is added to the *column* index
-	// (_column + x_shift in set_grid()). The original implementation used
-	// row_qty and LIMIT_ROW_SHIFT_* here, which meant shift_x was actually
-	// bounded/scaled by row data instead of column data. It now consistently
-	// uses column_qty and LIMIT_COLUMN_SHIFT_*.
     static shift_x = function(_value) 
     {
-	    var _column_shift = _value - column_qty;
-
-	    x_shift = clamp(_column_shift, LIMIT_COLUMN_SHIFT_MIN, LIMIT_COLUMN_SHIFT_MAX - (column_qty - 1));
-		
+		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
 		set_grid();
 	}
 	
@@ -215,10 +202,7 @@ _label_text_type_row = false, _label_text_type_column = true
 	
     static shift_y = function(_value) 
     {
-	    var _row_shift = _value - row_qty;
-
-	    y_shift = clamp(_row_shift, LIMIT_ROW_SHIFT_MIN, LIMIT_ROW_SHIFT_MAX - (row_qty - 1));
-		
+		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
 		set_grid();
 	}
 	
@@ -263,6 +247,11 @@ _label_text_type_row = false, _label_text_type_column = true
     static step = function() 
     {
 		if (detect_change() == true) { set_coords(); }
+		
+		if keyboard_check_pressed(vk_left) then shift_x(-1);
+		if keyboard_check_pressed(vk_right) then shift_x(1);
+		if keyboard_check_pressed(vk_up) then shift_y(-1);
+		if keyboard_check_pressed(vk_down) then shift_y(1);
 	}
 				
     static draw = function() 
