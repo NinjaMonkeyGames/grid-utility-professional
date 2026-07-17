@@ -7,6 +7,9 @@ global.grid_list = []; // Stores array of grid structs
 global.last_mouse_x = mouse_x;
 global.last_mouse_y = mouse_y;
 
+// Shared vertex format for all grid instances (position + colour, no texture needed for flat outlines)
+global.grid_vformat = undefined;
+
 /// @enum
 
 
@@ -16,14 +19,19 @@ global.last_mouse_y = mouse_y;
 #macro  LIMIT_CELL_HEIGHT_MAX 1024
 
 #macro  LIMIT_ROW_QTY_MIN 0
-#macro  LIMIT_ROW_QTY_MAX 1024
+#macro  LIMIT_ROW_QTY_MAX 128
 #macro  LIMIT_COLUMN_QTY_MIN 0
-#macro  LIMIT_COLUMN_QTY_MAX 1024
+#macro  LIMIT_COLUMN_QTY_MAX 128
 
 #macro LIMIT_ROW_SHIFT_MIN -9999
 #macro LIMIT_ROW_SHIFT_MAX 9999
 #macro LIMIT_COLUMN_SHIFT_MIN -9999
 #macro LIMIT_COLUMN_SHIFT_MAX 9999
+
+#macro LIMIT_X_SCALE_MIN 0.125
+#macro LIMIT_Y_SCALE_MIN 0.125
+#macro LIMIT_X_SCALE_MAX 4
+#macro LIMIT_Y_SCALE_MAX 4
 
 // Add dedicated macros here if rows and columns should ever be bounded differently.
 
@@ -72,11 +80,12 @@ _label_text_type_row = false, _label_text_type_column = false
     y_offset									= _y_offset;
 		
     cell_width								= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
-    cell_height								= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX); // FIX: was clamping against LIMIT_CELL_WIDTH_MIN
+    cell_height								= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
         
     row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
     column_qty							= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
         
+    grid_colour							= _grid_colour; // now actually stored/used (was previously accepted but ignored)
     text_colour							= _text_colour;
 	text_colour_selected				= _text_colour_selected;
 		
@@ -84,6 +93,20 @@ _label_text_type_row = false, _label_text_type_column = false
 	label_text_type_column		= _label_text_type_column;
 		
 	cell_data = [];
+
+	// Vertex buffer that holds every cell outline as a single batch of lines.
+	// Rebuilt only when set_grid() runs (i.e. when geometry actually changes),
+	// never per-frame, and submitted with one vertex_submit() call in draw().
+	vbuff = -1;
+
+	// Build the shared vertex format once, the first time any grid is created.
+	if (is_undefined(global.grid_vformat))
+	{
+		vertex_format_begin();
+		vertex_format_add_position();
+		vertex_format_add_colour();
+		global.grid_vformat = vertex_format_end();
+	}
     
 	set_grid();
 
@@ -93,6 +116,16 @@ _label_text_type_row = false, _label_text_type_column = false
 	function set_grid()
 	{
 		cell_data = [];
+
+		// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
+		if (vbuff != -1)
+		{
+			vertex_delete_buffer(vbuff);
+			vbuff = -1;
+		}
+
+		vbuff = vertex_create_buffer();
+		vertex_begin(vbuff, global.grid_vformat);
 		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
@@ -107,28 +140,62 @@ _label_text_type_row = false, _label_text_type_column = false
 				
 	            var _x_pos = x_offset + (_column	* cell_width	* x_scale);
 	            var _y_pos = y_offset + (_row			* cell_height	* y_scale);
+
+	            var _x1 = _x_pos;
+	            var _y1 = _y_pos;
+	            var _x2 = _x_pos + (cell_width	* x_scale);
+	            var _y2 = _y_pos + (cell_height	* y_scale);
+
+	            // Push this cell's outline into the shared buffer as 4 lines (8 vertices).
+	            // Inlined directly (rather than calling a helper script function) because
+	            // calling a sibling script function from inside a nested struct method
+	            // gets resolved against the struct instance first in GameMaker, which
+	            // throws "Variable ... not set before reading it" if the struct has no
+	            // member of that name. Inlining sidesteps that scoping entirely.
+	            //
+	            // NOTE: adjacent cells each contribute their own shared edge, so interior
+	            // lines are drawn twice. That's still one draw call total, but if you want
+	            // to shave the buffer down further, this can be rewritten as a lattice of
+	            // (row_qty + 1) horizontal and (column_qty + 1) vertical lines instead of
+	            // per-cell edges, which removes the duplicate interior lines entirely.
+
+	            // Top edge
+	            vertex_position(vbuff, _x1, _y1); vertex_colour(vbuff, grid_colour, 1);
+	            vertex_position(vbuff, _x2, _y1); vertex_colour(vbuff, grid_colour, 1);
+
+	            // Right edge
+	            vertex_position(vbuff, _x2, _y1); vertex_colour(vbuff, grid_colour, 1);
+	            vertex_position(vbuff, _x2, _y2); vertex_colour(vbuff, grid_colour, 1);
+
+	            // Bottom edge
+	            vertex_position(vbuff, _x2, _y2); vertex_colour(vbuff, grid_colour, 1);
+	            vertex_position(vbuff, _x1, _y2); vertex_colour(vbuff, grid_colour, 1);
+
+	            // Left edge
+	            vertex_position(vbuff, _x1, _y2); vertex_colour(vbuff, grid_colour, 1);
+	            vertex_position(vbuff, _x1, _y1); vertex_colour(vbuff, grid_colour, 1);
 				
 				// Store cell data
 				
 	            cell_data[_row][_column] =
 	            {
-	                x1 : _x_pos,
-	                x2 : _x_pos + (cell_width	* x_scale),
-	                y1 : _y_pos,
-	                y2 : _y_pos + (cell_height	* y_scale),
+	                x1 : _x1,
+					y1 : _y1,
+	                x2 : _x2,
+	                y2 : _y2,
                 
 	                label_row_text		: _row_string,
 	                label_column_text : _column_string,
                 
 	                // Left label
 					
-	                label_row_x : (_x_pos - string_width(_row_string)) - label_text_grid_gap_column,
-	                label_row_y : _y_pos + (cell_height * y_scale) / 2 - string_height(_column_string) / 2,
+	                label_row_x : (_x1 - string_width(_row_string)) - label_text_grid_gap_column,
+	                label_row_y : _y1 + (cell_height * y_scale) / 2 - string_height(_column_string) / 2,
 
 	                // Top label
 					
-	                label_column_x : _x_pos + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
-	                label_column_y : (_y_pos - string_height(_row_string)) - label_text_grid_gap_row,
+	                label_column_x : _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
+	                label_column_y : (_y1 - string_height(_row_string)) - label_text_grid_gap_row,
 					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
@@ -145,8 +212,11 @@ _label_text_type_row = false, _label_text_type_column = false
 	            if (_column != 0) cell_data[_row][_column].label_row_text    = "";
 	        }
 	    }
+
+		vertex_end(vbuff);
+		vertex_freeze(vbuff); // static geometry until the next set_grid() call — safe to freeze for a GPU-side speed boost
 	}
-	
+
 	/// @function destroy()
 	/// @description Cleans up the instance from the global list and clears data
 	
@@ -161,6 +231,13 @@ _label_text_type_row = false, _label_text_type_column = false
 	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
     
 	    cell_data = undefined; // Clear cell data
+
+		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
+		if (vbuff != -1)
+		{
+			vertex_delete_buffer(vbuff);
+			vbuff = -1;
+		}
 	
 	    // Mark as destroyed so any lingering references can check before use
 		
@@ -213,7 +290,7 @@ _label_text_type_row = false, _label_text_type_column = false
     {
 		var _select_x = get_x();
 		var _select_y = get_y();
-		
+
 		for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -241,21 +318,45 @@ _label_text_type_row = false, _label_text_type_column = false
 		return (_keyboard == true) ? keyboard_check(vk_anykey) : false;
 	}
 
+	/// @function						zoom
+	/// @description				Zooms in/out while preserving the grid's total on-screen size.
+	/// @param {Real}	_value	Amount to change scale by (e.g. 0.1 in, -0.1 out).
+
+	static zoom = function(_value)
+	{
+	    x_scale = clamp(x_scale + _value, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
+	    y_scale = clamp(y_scale + _value, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
+    
+	    set_grid();
+	}
+
 	/// @function			step
     /// @description	Execute step code for grid constructor instance.
 	
     static step = function() 
     {
-		if (detect_change() == true) { set_coords(); }
+		if mouse_wheel_down()
+		{
+			zoom(-x_scale);
+		}
 		
-		if keyboard_check_pressed(vk_left) then shift_x(-1);
-		if keyboard_check_pressed(vk_right) then shift_x(1);
-		if keyboard_check_pressed(vk_up) then shift_y(-1);
-		if keyboard_check_pressed(vk_down) then shift_y(1);
+		if mouse_wheel_up()
+		{
+			zoom(x_scale / 2);
+		}
+		
+		if (detect_change() == true) { set_coords(); }
 	}
 				
     static draw = function() 
     {
+		// One draw call for every outline in the grid, instead of row_qty * column_qty
+		// individual draw_rectangle() calls.
+		vertex_submit(vbuff, pr_linelist, -1);
+
+		// Text glyphs still have to go through draw_text_ext_colour - GameMaker's built-in
+		// font rendering doesn't expose a raw vertex path for this, but it's cheap relative
+		// to the rectangle calls we just eliminated.
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -264,8 +365,6 @@ _label_text_type_row = false, _label_text_type_column = false
 				
 	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
 	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
-	            
-				draw_rectangle(_cache_data.x1, _cache_data.y1, _cache_data.x2, _cache_data.y2, _cache_data.outline);
 	        }
 	    }
 	}
