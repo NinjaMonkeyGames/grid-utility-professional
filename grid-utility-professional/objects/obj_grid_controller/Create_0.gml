@@ -28,10 +28,10 @@ global.grid_vformat = undefined;
 #macro LIMIT_COLUMN_SHIFT_MIN -9999
 #macro LIMIT_COLUMN_SHIFT_MAX 9999
 
-#macro LIMIT_X_SCALE_MIN 0.25
-#macro LIMIT_Y_SCALE_MIN 0.25
-#macro LIMIT_X_SCALE_MAX 4
-#macro LIMIT_Y_SCALE_MAX 4
+#macro LIMIT_X_SCALE_MIN 0.125
+#macro LIMIT_Y_SCALE_MIN 0.125
+#macro LIMIT_X_SCALE_MAX 8
+#macro LIMIT_Y_SCALE_MAX 8
 
 // Add dedicated macros here if rows and columns should ever be bounded differently.
 
@@ -59,7 +59,8 @@ _cell_width = 64, _cell_height = 64,
 _row_qty = 12, _column_qty = 16, 
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
 _label_text_type_row = false, _label_text_type_column = false
-)  constructor
+)  
+constructor
 {
 	/// @description Calculation variables
 	
@@ -160,6 +161,7 @@ _label_text_type_row = false, _label_text_type_column = false
 			vertex_position(vbuff, _x, _grid_y1); vertex_colour(vbuff, grid_colour, 1);
 			vertex_position(vbuff, _x, _grid_y2); vertex_colour(vbuff, grid_colour, 1);
 		}
+		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -329,18 +331,58 @@ _label_text_type_row = false, _label_text_type_column = false
 	/// @description								Zooms in/out while preserving the grid's total on-screen size.
 	/// @param {Real}			_value		Amount to change scale by (e.g. 0.1 in, -0.1 out).
 
-	static zoom = function(_value)
+static zoom = function(_value)
+{
+	// Footprint that must stay constant across the zoom.
+	var _footprint_width	= column_qty	* cell_width	* x_scale;
+	var _footprint_height	= row_qty		* cell_height	* y_scale;
+	// Ratio we need to preserve after this zoom.
+	var _original_ratio = row_qty / column_qty;
+	// The scale zooming "wants" - not final, just used to work out how
+	// many cells are needed to keep the footprint the same size at that scale.
+	var _desired_x_scale = clamp(x_scale + _value, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
+	var _desired_y_scale = clamp(y_scale + _value, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
+	// Cells needed to fill the fixed footprint at the desired scale.
+	// row_qty/column_qty can only be whole numbers, so this rounds -
+	// which is exactly what creates the ratio discrepancy handled below.
+	var _new_column_qty	= clamp(round(_footprint_width  / (cell_width  * _desired_x_scale)), LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
+	var _new_row_qty	= clamp(round(_footprint_height / (cell_height * _desired_y_scale)), LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+	// The two independent roundings above can imply different row:column
+	// ratios. Re-derive each dimension from the other using the original
+	// ratio, and keep whichever pairing produces the larger value - i.e.
+	// tend towards the higher value rather than shrinking the grid.
+	var _row_from_column	= clamp(round(_new_column_qty * _original_ratio), LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+	var _column_from_row	= clamp(round(_new_row_qty / _original_ratio), LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
+	if (_row_from_column >= _new_row_qty)
 	{
-		
-		
-	    set_grid();
+		// Deriving row from column gives the bigger (or equal) row count -
+		// keep column_qty as-is, raise row_qty to match the ratio.
+		_new_row_qty = _row_from_column;
 	}
+	else
+	{
+		// Deriving column from row gives the bigger column count instead -
+		// keep row_qty as-is, raise column_qty to match the ratio.
+		_new_column_qty = _column_from_row;
+	}
+	// Rounding to a whole cell count means _desired_x_scale/_desired_y_scale no
+	// longer reproduce the footprint exactly (e.g. wanting 8.4 columns but getting
+	// 8). Solve backwards from the actual (rounded) cell count for the scale that
+	// makes qty * cell_size * scale land on the footprint exactly.
+	x_scale = (_new_column_qty > 0) ? clamp(_footprint_width  / (_new_column_qty * cell_width),  LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX) : _desired_x_scale;
+	y_scale = (_new_row_qty    > 0) ? clamp(_footprint_height / (_new_row_qty    * cell_height), LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX) : _desired_y_scale;
+	column_qty	= _new_column_qty;
+	row_qty		= _new_row_qty;
+
+	set_grid();
+}
 
 	/// @function			step
     /// @description	Execute step code for grid constructor instance.
 	
     static step = function() 
     {
+
 		if mouse_wheel_down()
 		{
 			zoom(-0.1);

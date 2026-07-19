@@ -92,6 +92,7 @@ or calling functions inside larger expressions).
 - optimisation and code clarity.
 - Comment Philosophy: "Comments should explain the intent ('Why' this is done) rather than the mechanics
 - ('What' the code does), as the code itself should be self-documenting through clear variable naming."
+- 
 
 ## 6. Resource Management
 
