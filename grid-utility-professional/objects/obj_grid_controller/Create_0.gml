@@ -28,8 +28,8 @@ global.grid_vformat = undefined;
 #macro LIMIT_COLUMN_SHIFT_MIN -9999
 #macro LIMIT_COLUMN_SHIFT_MAX 9999
 
-#macro LIMIT_X_SCALE_MIN 0.125
-#macro LIMIT_Y_SCALE_MIN 0.125
+#macro LIMIT_X_SCALE_MIN 0.25
+#macro LIMIT_Y_SCALE_MIN 0.25
 #macro LIMIT_X_SCALE_MAX 4
 #macro LIMIT_Y_SCALE_MAX 4
 
@@ -94,12 +94,14 @@ _label_text_type_row = false, _label_text_type_column = false
 		
 	cell_data = [];
 
-	// Vertex buffer that holds every cell outline as a single batch of lines.
+	// Vertex buffer that holds the grid outline as a single batch of lines.
 	// Rebuilt only when set_grid() runs (i.e. when geometry actually changes),
 	// never per-frame, and submitted with one vertex_submit() call in draw().
+	
 	vbuff = -1;
 
 	// Build the shared vertex format once, the first time any grid is created.
+	
 	if (is_undefined(global.grid_vformat))
 	{
 		vertex_format_begin();
@@ -118,6 +120,7 @@ _label_text_type_row = false, _label_text_type_column = false
 		cell_data = [];
 
 		// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
+		
 		if (vbuff != -1)
 		{
 			vertex_delete_buffer(vbuff);
@@ -126,7 +129,37 @@ _label_text_type_row = false, _label_text_type_column = false
 
 		vbuff = vertex_create_buffer();
 		vertex_begin(vbuff, global.grid_vformat);
-		
+
+		var _grid_x1 = x_offset;
+		var _grid_y1 = y_offset;
+		var _grid_x2 = x_offset + (column_qty * cell_width	* x_scale);
+		var _grid_y2 = y_offset + (row_qty		* cell_height	* y_scale);
+
+		// Lattice of (row_qty + 1) horizontal lines and (column_qty + 1) vertical lines,
+		// instead of per-cell edges. Every interior line is shared by two cells, so
+		// drawing it once here (rather than once per adjoining cell) removes the
+		// duplicate interior lines that the old per-cell approach produced, while still
+		// being submitted as a single draw call via vertex_submit(vbuff, pr_linelist, -1).
+
+		// Horizontal lines
+
+		for (var _row = 0; _row <= row_qty; ++_row)
+		{
+			var _y = y_offset + (_row * cell_height * y_scale);
+
+			vertex_position(vbuff, _grid_x1, _y); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, _grid_x2, _y); vertex_colour(vbuff, grid_colour, 1);
+		}
+
+		// Vertical lines
+
+		for (var _column = 0; _column <= column_qty; ++_column)
+		{
+			var _x = x_offset + (_column * cell_width * x_scale);
+
+			vertex_position(vbuff, _x, _grid_y1); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, _x, _grid_y2); vertex_colour(vbuff, grid_colour, 1);
+		}
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -146,37 +179,11 @@ _label_text_type_row = false, _label_text_type_column = false
 	            var _x2 = _x_pos + (cell_width	* x_scale);
 	            var _y2 = _y_pos + (cell_height	* y_scale);
 
-	            // Push this cell's outline into the shared buffer as 4 lines (8 vertices).
-	            // Inlined directly (rather than calling a helper script function) because
-	            // calling a sibling script function from inside a nested struct method
-	            // gets resolved against the struct instance first in GameMaker, which
-	            // throws "Variable ... not set before reading it" if the struct has no
-	            // member of that name. Inlining sidesteps that scoping entirely.
-	            //
-	            // NOTE: adjacent cells each contribute their own shared edge, so interior
-	            // lines are drawn twice. That's still one draw call total, but if you want
-	            // to shave the buffer down further, this can be rewritten as a lattice of
-	            // (row_qty + 1) horizontal and (column_qty + 1) vertical lines instead of
-	            // per-cell edges, which removes the duplicate interior lines entirely.
+	            // Cell outlines themselves are no longer pushed here - they're covered by
+	            // the horizontal/vertical lattice lines built above. cell_data below still
+	            // stores each cell's bounds/labels, just not its own copy of the edges.
 
-	            // Top edge
-	            vertex_position(vbuff, _x1, _y1); vertex_colour(vbuff, grid_colour, 1);
-	            vertex_position(vbuff, _x2, _y1); vertex_colour(vbuff, grid_colour, 1);
-
-	            // Right edge
-	            vertex_position(vbuff, _x2, _y1); vertex_colour(vbuff, grid_colour, 1);
-	            vertex_position(vbuff, _x2, _y2); vertex_colour(vbuff, grid_colour, 1);
-
-	            // Bottom edge
-	            vertex_position(vbuff, _x2, _y2); vertex_colour(vbuff, grid_colour, 1);
-	            vertex_position(vbuff, _x1, _y2); vertex_colour(vbuff, grid_colour, 1);
-
-	            // Left edge
-	            vertex_position(vbuff, _x1, _y2); vertex_colour(vbuff, grid_colour, 1);
-	            vertex_position(vbuff, _x1, _y1); vertex_colour(vbuff, grid_colour, 1);
-				
-				// Store cell data
-				
+	            // Store cell data
 	            cell_data[_row][_column] =
 	            {
 	                x1 : _x1,
@@ -318,15 +325,14 @@ _label_text_type_row = false, _label_text_type_column = false
 		return (_keyboard == true) ? keyboard_check(vk_anykey) : false;
 	}
 
-	/// @function						zoom
-	/// @description				Zooms in/out while preserving the grid's total on-screen size.
-	/// @param {Real}	_value	Amount to change scale by (e.g. 0.1 in, -0.1 out).
+	/// @function										zoom
+	/// @description								Zooms in/out while preserving the grid's total on-screen size.
+	/// @param {Real}			_value		Amount to change scale by (e.g. 0.1 in, -0.1 out).
 
 	static zoom = function(_value)
 	{
-	    x_scale = clamp(x_scale + _value, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
-	    y_scale = clamp(y_scale + _value, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
-    
+		
+		
 	    set_grid();
 	}
 
@@ -337,12 +343,12 @@ _label_text_type_row = false, _label_text_type_column = false
     {
 		if mouse_wheel_down()
 		{
-			zoom(-x_scale);
+			zoom(-0.1);
 		}
 		
 		if mouse_wheel_up()
 		{
-			zoom(x_scale / 2);
+			zoom(0.1);
 		}
 		
 		if (detect_change() == true) { set_coords(); }
