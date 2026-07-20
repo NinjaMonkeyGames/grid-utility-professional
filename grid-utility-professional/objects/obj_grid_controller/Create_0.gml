@@ -43,8 +43,8 @@ global.grid_vformat = undefined;
 /// @param {Real}							    [_y_offset]								The vertical starting position (origin) of the grid within the coordinate space.
 /// @param {Real}							    [_cell_width]							The width of an individual grid cell in pixels or units. 
 /// @param {Real}							    [_cell_height]							The height of an individual grid cell in pixels or units.
-/// @param {Real}							    [_row_qty]								Total number of rows defined in the grid.
-/// @param {Real}								[_column_qty]						Total number of columns defined in the grid.
+/// @param {Real}							    [_row_qty]								Total number of rows.
+/// @param {Real}								[_column_qty]						Total number of columns.
 /// @param {bool}								[_label_text_type_row]			Determine if row label text should be represented as numbers or letters.
 /// @param {bool}								[_label_text_type_column]	Determine if column label text should be represented as numbers or letters.
 /// @param {Constant.Colour}			[_grid_colour]						Default label text colour.
@@ -74,7 +74,11 @@ constructor
 	label_text_grid_gap_column = 12;
 
 	is_destroyed = false; 
-		
+	vbuff = -1;
+	cache_cursor = window_get_cursor();
+	
+	cell_data = [];
+	
 	/// @description Imported variables
 	
     x_offset									= _x_offset;
@@ -86,20 +90,14 @@ constructor
     row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
     column_qty							= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
         
-    grid_colour							= _grid_colour; // now actually stored/used (was previously accepted but ignored)
+    grid_colour							= _grid_colour;
     text_colour							= _text_colour;
 	text_colour_selected				= _text_colour_selected;
 		
 	label_text_type_row				= _label_text_type_row;
 	label_text_type_column		= _label_text_type_column;
 		
-	cell_data = [];
 
-	// Vertex buffer that holds the grid outline as a single batch of lines.
-	// Rebuilt only when set_grid() runs (i.e. when geometry actually changes),
-	// never per-frame, and submitted with one vertex_submit() call in draw().
-	
-	vbuff = -1;
 
 	// Build the shared vertex format once, the first time any grid is created.
 	
@@ -108,6 +106,7 @@ constructor
 		vertex_format_begin();
 		vertex_format_add_position();
 		vertex_format_add_colour();
+		
 		global.grid_vformat = vertex_format_end();
 	}
     
@@ -131,16 +130,10 @@ constructor
 		vbuff = vertex_create_buffer();
 		vertex_begin(vbuff, global.grid_vformat);
 
-		var _grid_x1 = x_offset;
-		var _grid_y1 = y_offset;
-		var _grid_x2 = x_offset + (column_qty * cell_width	* x_scale);
-		var _grid_y2 = y_offset + (row_qty		* cell_height	* y_scale);
-
-		// Lattice of (row_qty + 1) horizontal lines and (column_qty + 1) vertical lines,
-		// instead of per-cell edges. Every interior line is shared by two cells, so
-		// drawing it once here (rather than once per adjoining cell) removes the
-		// duplicate interior lines that the old per-cell approach produced, while still
-		// being submitted as a single draw call via vertex_submit(vbuff, pr_linelist, -1).
+		grid_x1 = x_offset;
+		grid_y1 = y_offset;
+		grid_x2 = x_offset + (column_qty * cell_width	* x_scale);
+		grid_y2 = y_offset + (row_qty		* cell_height	* y_scale);
 
 		// Horizontal lines
 
@@ -148,8 +141,8 @@ constructor
 		{
 			var _y = y_offset + (_row * cell_height * y_scale);
 
-			vertex_position(vbuff, _grid_x1, _y); vertex_colour(vbuff, grid_colour, 1);
-			vertex_position(vbuff, _grid_x2, _y); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, grid_x1, _y); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, grid_x2, _y); vertex_colour(vbuff, grid_colour, 1);
 		}
 
 		// Vertical lines
@@ -158,8 +151,8 @@ constructor
 		{
 			var _x = x_offset + (_column * cell_width * x_scale);
 
-			vertex_position(vbuff, _x, _grid_y1); vertex_colour(vbuff, grid_colour, 1);
-			vertex_position(vbuff, _x, _grid_y2); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, _x, grid_y1); vertex_colour(vbuff, grid_colour, 1);
+			vertex_position(vbuff, _x, grid_y2); vertex_colour(vbuff, grid_colour, 1);
 		}
 		
 	    for (var _row = 0; _row < row_qty; ++_row) 
@@ -181,11 +174,8 @@ constructor
 	            var _x2 = _x_pos + (cell_width	* x_scale);
 	            var _y2 = _y_pos + (cell_height	* y_scale);
 
-	            // Cell outlines themselves are no longer pushed here - they're covered by
-	            // the horizontal/vertical lattice lines built above. cell_data below still
-	            // stores each cell's bounds/labels, just not its own copy of the edges.
-
 	            // Store cell data
+				
 	            cell_data[_row][_column] =
 	            {
 	                x1 : _x1,
@@ -242,6 +232,7 @@ constructor
 	    cell_data = undefined; // Clear cell data
 
 		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
+		
 		if (vbuff != -1)
 		{
 			vertex_delete_buffer(vbuff);
@@ -333,56 +324,42 @@ constructor
 
 static zoom = function(_value)
 {
-	// Footprint that must stay constant across the zoom.
-	var _footprint_width	= column_qty	* cell_width	* x_scale;
-	var _footprint_height	= row_qty		* cell_height	* y_scale;
-	// Ratio we need to preserve after this zoom.
-	var _original_ratio = row_qty / column_qty;
-	// The scale zooming "wants" - not final, just used to work out how
-	// many cells are needed to keep the footprint the same size at that scale.
-	var _desired_x_scale = clamp(x_scale + _value, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
-	var _desired_y_scale = clamp(y_scale + _value, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
-	// Cells needed to fill the fixed footprint at the desired scale.
-	// row_qty/column_qty can only be whole numbers, so this rounds -
-	// which is exactly what creates the ratio discrepancy handled below.
-	var _new_column_qty	= clamp(round(_footprint_width  / (cell_width  * _desired_x_scale)), LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-	var _new_row_qty	= clamp(round(_footprint_height / (cell_height * _desired_y_scale)), LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-	// The two independent roundings above can imply different row:column
-	// ratios. Re-derive each dimension from the other using the original
-	// ratio, and keep whichever pairing produces the larger value - i.e.
-	// tend towards the higher value rather than shrinking the grid.
-	var _row_from_column	= clamp(round(_new_column_qty * _original_ratio), LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-	var _column_from_row	= clamp(round(_new_row_qty / _original_ratio), LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-	if (_row_from_column >= _new_row_qty)
-	{
-		// Deriving row from column gives the bigger (or equal) row count -
-		// keep column_qty as-is, raise row_qty to match the ratio.
-		_new_row_qty = _row_from_column;
-	}
-	else
-	{
-		// Deriving column from row gives the bigger column count instead -
-		// keep row_qty as-is, raise column_qty to match the ratio.
-		_new_column_qty = _column_from_row;
-	}
-	// Rounding to a whole cell count means _desired_x_scale/_desired_y_scale no
-	// longer reproduce the footprint exactly (e.g. wanting 8.4 columns but getting
-	// 8). Solve backwards from the actual (rounded) cell count for the scale that
-	// makes qty * cell_size * scale land on the footprint exactly.
-	x_scale = (_new_column_qty > 0) ? clamp(_footprint_width  / (_new_column_qty * cell_width),  LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX) : _desired_x_scale;
-	y_scale = (_new_row_qty    > 0) ? clamp(_footprint_height / (_new_row_qty    * cell_height), LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX) : _desired_y_scale;
-	column_qty	= _new_column_qty;
-	row_qty		= _new_row_qty;
-
+	x_scale += _value;
+	y_scale += _value;
+	
+	x_scale = clamp(x_scale, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
+	y_scale = clamp(y_scale, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
+	
 	set_grid();
 }
+
+	/// @function												set_cursor
+    /// @description										Set mouse pointer graphic
+	
+    static set_cursor = function(_sprite) 
+    {
+		grid_x1 = x_offset;
+		grid_y1 = y_offset;
+		grid_x2 = x_offset + (column_qty * cell_width);
+		grid_y2 = y_offset + (row_qty * cell_height); // chanhe this to get from array to save calculation
+		
+		if _sprite != undefined then 
+		
+		if point_in_rectangle(mouse_x, mouse_y, grid_x1, grid_y1, grid_x2, grid_y2)
+		{
+			window_set_cursor(cr_handpoint);
+		}
+			else
+		{
+			window_set_cursor(cr_arrow);
+		}
+	}
 
 	/// @function			step
     /// @description	Execute step code for grid constructor instance.
 	
     static step = function() 
     {
-
 		if mouse_wheel_down()
 		{
 			zoom(-0.1);
@@ -393,18 +370,19 @@ static zoom = function(_value)
 			zoom(0.1);
 		}
 		
-		if (detect_change() == true) { set_coords(); }
+		if detect_change() == true // Prevents unnecessary calculations if no input was detected.
+		{ 
+			set_coords(); 
+			set_cursor();
+		}
 	}
 				
     static draw = function() 
     {
 		// One draw call for every outline in the grid, instead of row_qty * column_qty
-		// individual draw_rectangle() calls.
+
 		vertex_submit(vbuff, pr_linelist, -1);
 
-		// Text glyphs still have to go through draw_text_ext_colour - GameMaker's built-in
-		// font rendering doesn't expose a raw vertex path for this, but it's cheap relative
-		// to the rectangle calls we just eliminated.
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
