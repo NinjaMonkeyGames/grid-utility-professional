@@ -58,6 +58,7 @@ practices when working with an NinjaMonkeyGames project.
 
 ## 3. Data Structures & Syntax
 
+- **MVC (Model View Controller):** This project uses MVC architecture design philosophy.
 - **Array Indexing:** Use bracket-nesting syntax exclusively: `array[x][y]`. Tuple-style indexing
 (e.g., `array[x, y]`) is forbidden.
 - **Ternary Operator:** Use `condition ? true_val : false_val` for concise conditional assignments.
@@ -92,7 +93,6 @@ or calling functions inside larger expressions).
 - optimisation and code clarity.
 - Comment Philosophy: "Comments should explain the intent ('Why' this is done) rather than the mechanics
 - ('What' the code does), as the code itself should be self-documenting through clear variable naming."
-- 
 
 ## 6. Resource Management
 

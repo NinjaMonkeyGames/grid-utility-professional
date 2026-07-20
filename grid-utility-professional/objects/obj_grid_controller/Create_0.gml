@@ -57,7 +57,7 @@ function grid
 _x_offset = 64, _y_offset = 32, 
 _cell_width = 64, _cell_height = 64, 
 _row_qty = 12, _column_qty = 16, 
-_label_text_type_row = false, _label_text_type_column = false,
+_label_text_type_row = false, _label_text_type_column = true,
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
 
 )  
@@ -97,8 +97,6 @@ constructor
 	label_text_type_row				= _label_text_type_row;
 	label_text_type_column		= _label_text_type_column;
 		
-
-
 	// Build the shared vertex format once, the first time any grid is created.
 	
 	if (is_undefined(global.grid_vformat))
@@ -110,13 +108,12 @@ constructor
 		global.grid_vformat = vertex_format_end();
 	}
     
-	set_grid();
-
     /// @function											set_grid
     /// @description									Updates grid or initialises first grid. 				
 
-	function set_grid()
+	static set_grid = function()
 	{
+		show_debug_message(row_qty);
 		cell_data = [];
 
 		// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
@@ -189,12 +186,12 @@ constructor
 	                // Left label
 					
 	                label_row_x : (_x1 - string_width(_row_string)) - label_text_grid_gap_row,
-	                label_row_y : _y1 + (cell_height * y_scale) / 2 - string_height(_column_string) / 2,
+	                label_row_y : _y1 + (cell_height * y_scale) / 2 - string_height(_row_string) / 2,
 
 	                // Top label
 					
 	                label_column_x : _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
-	                label_column_y : (_y1 - string_height(_row_string)) - label_text_grid_gap_column,
+	                label_column_y : (_y1 - string_height(_column_string)) - label_text_grid_gap_column,
 					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
@@ -215,35 +212,8 @@ constructor
 		vertex_end(vbuff);
 		vertex_freeze(vbuff); // static geometry until the next set_grid() call — safe to freeze for a GPU-side speed boost
 	}
-
-	/// @function destroy()
-	/// @description Cleans up the instance from the global list and clears data
 	
-	static destroy = function() 
-	{
-	    // Find the current instance's index in the global array
-		
-	    var _index = array_get_index(global.grid_list, self);
-    
-	    // Only remove if it actually exists in the array
-		
-	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
-    
-	    cell_data = undefined; // Clear cell data
-
-		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
-		
-		if (vbuff != -1)
-		{
-			vertex_delete_buffer(vbuff);
-			vbuff = -1;
-		}
-	
-	    // Mark as destroyed so any lingering references can check before use
-		
-	    is_destroyed = true;
-		
-	}
+	set_grid();
 	
 	/// @function			get_x
 	/// @description								Gets the selected X coordinate.
@@ -300,21 +270,35 @@ constructor
 			}
 		}
 	}
+	
+	/// @function										update_row
+	/// @description								Changes the number of rows.
+	/// @param {Real}			_value		Number of rows in new grid.
+
+	static update_row = function(_value)
+	{
+		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+		set_grid();
+	}
+	
+	/// @function										update_row
+	/// @description								Changes the number of rows.
+	/// @param {Real}			_value		Number of rows in new grid.
+
+	static update_column = function(_value)
+	{
+		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
+		set_grid();
+	}
 
 	/// @function										zoom
 	/// @description								Zooms in/out while preserving the grid's total on-screen size.
 	/// @param {Real}			_value		Amount to change scale by (e.g. 0.1 in, -0.1 out).
 
-static zoom = function(_value)
-{
-	x_scale += _value;
-	y_scale += _value;
+	static zoom = function(_value)
+	{
 	
-	x_scale = clamp(x_scale, LIMIT_X_SCALE_MIN, LIMIT_X_SCALE_MAX);
-	y_scale = clamp(y_scale, LIMIT_Y_SCALE_MIN, LIMIT_Y_SCALE_MAX);
-	
-	set_grid();
-}
+	}
 
 	/// @function												set_cursor
     /// @description										Set mouse pointer graphic
@@ -336,6 +320,12 @@ static zoom = function(_value)
 	
     static step = function() 
     {
+		if keyboard_check_pressed(vk_space)
+		{
+			update_row(5);
+			update_column(5);
+		}
+		
 		if mouse_wheel_down()
 		{
 			zoom(-0.1);
@@ -357,7 +347,7 @@ static zoom = function(_value)
 				
     static draw = function() 
     {
-		// One draw call for every outline in the grid, instead of row_qty * column_qty
+		// One draw call for every outline in the grid.
 
 		vertex_submit(vbuff, pr_linelist, -1);
 
@@ -371,6 +361,30 @@ static zoom = function(_value)
 	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
 	        }
 	    }
+	}
+	
+	/// @function destroy()
+	/// @description Cleans up the instance from the global list and clears data
+	
+	static destroy = function() 
+	{
+	    // Find the current instance's index in the global array
+		
+	    var _index = array_get_index(global.grid_list, self);
+    
+	    // Only remove if it actually exists in the array
+		
+	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
+    
+	    cell_data = undefined; // Clear cell data
+
+		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
+		
+		if (vbuff != -1)
+		{
+			vertex_delete_buffer(vbuff);
+			vbuff = -1;
+		}
 	}
 	
     array_push(global.grid_list, self); // Add copy of self to grid array.
