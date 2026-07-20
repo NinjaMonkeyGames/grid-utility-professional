@@ -18,9 +18,9 @@ global.grid_vformat = undefined;
 #macro  LIMIT_CELL_HEIGHT_MIN 8
 #macro  LIMIT_CELL_HEIGHT_MAX 1024
 
-#macro  LIMIT_ROW_QTY_MIN 0
+#macro  LIMIT_ROW_QTY_MIN 1
 #macro  LIMIT_ROW_QTY_MAX 128
-#macro  LIMIT_COLUMN_QTY_MIN 0
+#macro  LIMIT_COLUMN_QTY_MIN 1
 #macro  LIMIT_COLUMN_QTY_MAX 128
 
 #macro LIMIT_ROW_SHIFT_MIN -9999
@@ -57,8 +57,9 @@ function grid
 _x_offset = 64, _y_offset = 32, 
 _cell_width = 64, _cell_height = 64, 
 _row_qty = 12, _column_qty = 16, 
+_label_text_type_row = false, _label_text_type_column = false,
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
-_label_text_type_row = false, _label_text_type_column = false
+
 )  
 constructor
 {
@@ -67,13 +68,12 @@ constructor
 	x_scale = 1;
     y_scale = 1;
 		
-	x_shift = 1;
-	y_shift = 1;
+	x_shift = 0;
+	y_shift = 0;
 		
-	label_text_grid_gap_row = 6;
-	label_text_grid_gap_column = 12;
+	label_text_grid_gap_column = 6;
+	label_text_grid_gap_row = 12;
 
-	is_destroyed = false; 
 	vbuff = -1;
 	cache_cursor = window_get_cursor();
 	
@@ -188,13 +188,13 @@ constructor
                 
 	                // Left label
 					
-	                label_row_x : (_x1 - string_width(_row_string)) - label_text_grid_gap_column,
+	                label_row_x : (_x1 - string_width(_row_string)) - label_text_grid_gap_row,
 	                label_row_y : _y1 + (cell_height * y_scale) / 2 - string_height(_column_string) / 2,
 
 	                // Top label
 					
 	                label_column_x : _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
-	                label_column_y : (_y1 - string_height(_row_string)) - label_text_grid_gap_row,
+	                label_column_y : (_y1 - string_height(_row_string)) - label_text_grid_gap_column,
 					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
@@ -300,23 +300,6 @@ constructor
 			}
 		}
 	}
-	
-	/// @function																detect_change
-	/// @description														Checks whether the mouse has moved and/or a key is being pressed since the last check.
-	/// @param               [_mouse]				{Bool}			Set this if you want to check mouse movement.
-	/// @param               [_keyboard]		{Bool}			Set this if you want to check keyboard activity.
-	/// @return											{Bool}			Returns true if state has changed and false if it has not.
-	/// @pure
-
-	static detect_change = function(_mouse = true, _keyboard = true)
-	{
-		if (_mouse == true)
-		{
-			if (mouse_x != global.last_mouse_x || mouse_y != global.last_mouse_y) { return true; }
-		}
-		
-		return (_keyboard == true) ? keyboard_check(vk_anykey) : false;
-	}
 
 	/// @function										zoom
 	/// @description								Zooms in/out while preserving the grid's total on-screen size.
@@ -336,22 +319,15 @@ static zoom = function(_value)
 	/// @function												set_cursor
     /// @description										Set mouse pointer graphic
 	
-    static set_cursor = function(_sprite) 
+    static set_cursor = function() 
     {
-		grid_x1 = x_offset;
-		grid_y1 = y_offset;
-		grid_x2 = x_offset + (column_qty * cell_width);
-		grid_y2 = y_offset + (row_qty * cell_height); // chanhe this to get from array to save calculation
-		
-		if _sprite != undefined then 
-		
 		if point_in_rectangle(mouse_x, mouse_y, grid_x1, grid_y1, grid_x2, grid_y2)
 		{
-			window_set_cursor(cr_handpoint);
+			window_set_cursor(cr_handpoint) 
 		}
 			else
 		{
-			window_set_cursor(cr_arrow);
+			window_set_cursor(cache_cursor);
 		}
 	}
 
@@ -370,11 +346,13 @@ static zoom = function(_value)
 			zoom(0.1);
 		}
 		
-		if detect_change() == true // Prevents unnecessary calculations if no input was detected.
-		{ 
-			set_coords(); 
-			set_cursor();
-		}
+		if keyboard_check_pressed(vk_left)		then shift_x(-1);
+		if keyboard_check_pressed(vk_right)		then shift_x(1);
+		if keyboard_check_pressed(vk_up)			then shift_y(-1);
+		if keyboard_check_pressed(vk_down)	then shift_y(1);
+		
+		set_coords(); 
+		set_cursor();
 	}
 				
     static draw = function() 
