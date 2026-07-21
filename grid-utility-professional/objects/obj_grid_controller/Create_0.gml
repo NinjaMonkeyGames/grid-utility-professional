@@ -2,16 +2,10 @@
 
 /// @description Generate 2D grid
 
-global.grid_list = []; // Stores array of grid structs
+global.grid_list = [];							// Stores array of grid structs
+global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
-global.last_mouse_x = mouse_x;
-global.last_mouse_y = mouse_y;
-
-// Shared vertex format for all grid instances (position + colour, no texture needed for flat outlines)
-global.grid_vformat = undefined;
-
-/// @enum
-
+/// @description Soft limits
 
 #macro  LIMIT_CELL_WIDTH_MIN 8
 #macro  LIMIT_CELL_WIDTH_MAX 1024
@@ -28,12 +22,10 @@ global.grid_vformat = undefined;
 #macro LIMIT_COLUMN_SHIFT_MIN -9999
 #macro LIMIT_COLUMN_SHIFT_MAX 9999
 
-#macro LIMIT_X_SCALE_MIN 0.125
-#macro LIMIT_Y_SCALE_MIN 0.125
-#macro LIMIT_X_SCALE_MAX 8
-#macro LIMIT_Y_SCALE_MAX 8
-
-// Add dedicated macros here if rows and columns should ever be bounded differently.
+#macro LIMIT_X_SCALE_MIN 0.25
+#macro LIMIT_Y_SCALE_MIN 0.25
+#macro LIMIT_X_SCALE_MAX 4
+#macro LIMIT_Y_SCALE_MAX 4
 
 /// @function grid()
 /// @constructor
@@ -56,7 +48,7 @@ function grid
 (
 _x_offset = 64, _y_offset = 32, 
 _cell_width = 64, _cell_height = 64, 
-_row_qty = 12, _column_qty = 16, 
+_row_qty = 18, _column_qty = 24, 
 _label_text_type_row = false, _label_text_type_column = true,
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
 
@@ -97,7 +89,7 @@ constructor
 	label_text_type_row				= _label_text_type_row;
 	label_text_type_column		= _label_text_type_column;
 		
-	// Build the shared vertex format once, the first time any grid is created.
+	/// @description Build the shared vertex format once, the first time any grid is created.
 	
 	if (is_undefined(global.grid_vformat))
 	{
@@ -113,7 +105,6 @@ constructor
 
 	static set_grid = function()
 	{
-		show_debug_message(row_qty);
 		cell_data = [];
 
 		// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
@@ -126,7 +117,9 @@ constructor
 
 		vbuff = vertex_create_buffer();
 		vertex_begin(vbuff, global.grid_vformat);
-
+		
+		// Calculate vertex boundries
+		
 		grid_x1 = x_offset;
 		grid_y1 = y_offset;
 		grid_x2 = x_offset + (column_qty * cell_width	* x_scale);
@@ -151,6 +144,8 @@ constructor
 			vertex_position(vbuff, _x, grid_y1); vertex_colour(vbuff, grid_colour, 1);
 			vertex_position(vbuff, _x, grid_y2); vertex_colour(vbuff, grid_colour, 1);
 		}
+		
+		// Build grid
 		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
@@ -240,7 +235,7 @@ constructor
     static shift_x = function(_value) 
     {
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
-		set_grid();
+		//set_grid();
 	}
 	
 	/// @function												shift_y
@@ -250,7 +245,7 @@ constructor
     static shift_y = function(_value) 
     {
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
-		set_grid();
+		//set_grid();
 	}
 	
 	/// @function										set_coords
@@ -281,9 +276,9 @@ constructor
 		set_grid();
 	}
 	
-	/// @function										update_row
-	/// @description								Changes the number of rows.
-	/// @param {Real}			_value		Number of rows in new grid.
+	/// @function										update_column
+	/// @description								Changes the number of columns.
+	/// @param {Real}			_value		Number of columns in new grid.
 
 	static update_column = function(_value)
 	{
@@ -297,7 +292,51 @@ constructor
 
 	static zoom = function(_value)
 	{
-	
+		if is_real(_value) // Sanatise input prevent error
+		{
+	        if (_value < 0)
+	        {
+	            // Zooming Out: halve the scale, double the row/column quantities
+				
+	            var _new_x_scale	= x_scale / 2;
+	            var _new_y_scale	= y_scale / 2;
+	            var _new_col			= column_qty * 2;
+	            var _new_row		= row_qty * 2;
+            
+	            // Check if the new state respects your absolute limits
+				
+	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
+	                _new_col <= LIMIT_COLUMN_QTY_MAX && _new_row <= LIMIT_ROW_QTY_MAX)
+	            {
+	                x_scale			= _new_x_scale;
+	                y_scale			= _new_y_scale;
+	                column_qty	= _new_col;
+	                row_qty			= _new_row;
+	            }
+	        }
+				else
+	        {
+	            // Zooming In: double the scale, halve the row/column quantities
+				
+	            var _new_x_scale		= x_scale * 2;
+	            var _new_y_scale		= y_scale * 2;
+	            var _new_col				= round(column_qty / 2);
+	            var _new_row			= round(row_qty / 2);
+            
+	            // Check if the new state respects your absolute limits and won't hit zero cells
+				
+	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
+	                _new_col >= LIMIT_COLUMN_QTY_MIN && _new_row >= LIMIT_ROW_QTY_MIN)
+	            {
+	                x_scale			= _new_x_scale;
+	                y_scale			= _new_y_scale;
+	                column_qty	= _new_col;
+	                row_qty			= _new_row;
+	            }
+			}
+        }
+       
+        set_grid(); // Rebuild the grid geometry
 	}
 
 	/// @function												set_cursor
@@ -320,12 +359,6 @@ constructor
 	
     static step = function() 
     {
-		if keyboard_check_pressed(vk_space)
-		{
-			update_row(5);
-			update_column(5);
-		}
-		
 		if mouse_wheel_down()
 		{
 			zoom(-0.1);
