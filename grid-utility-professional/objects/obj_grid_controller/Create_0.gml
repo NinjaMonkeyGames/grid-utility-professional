@@ -46,12 +46,11 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
 function grid
 (
-_x_offset = 64, _y_offset = 32, 
+_x_offset = 32, _y_offset = 32, 
 _cell_width = 64, _cell_height = 64, 
 _row_qty = 18, _column_qty = 24, 
 _label_text_type_row = false, _label_text_type_column = true,
-_grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red, 
-
+_grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red
 )  
 constructor
 {
@@ -70,7 +69,14 @@ constructor
 	cache_cursor = window_get_cursor();
 	
 	cell_data = [];
-	
+
+	// Vertex boundary cache (populated by set_grid) - declared here for discoverability
+
+	grid_x1 = 0;
+	grid_y1 = 0;
+	grid_x2 = 0;
+	grid_y2 = 0;
+
 	/// @description Imported variables
 	
     x_offset									= _x_offset;
@@ -99,6 +105,20 @@ constructor
 		
 		global.grid_vformat = vertex_format_end();
 	}
+
+	/// @function											clamp_shifts
+	/// @description									Re-clamps x_shift/y_shift against the current row_qty/column_qty.
+	///                                                 Needed after update_row()/update_column() (or zoom, which changes
+	///                                                 row_qty/column_qty directly) since a shift that was valid for the
+	///                                                 old quantity can be out of range for the new one, which would
+	///                                                 otherwise leave stale/incorrect row or column labels showing
+	///                                                 until the next manual shift_x()/shift_y() call.
+
+	static clamp_shifts = function()
+	{
+		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
+		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
+	}
     
     /// @function											set_grid
     /// @description									Updates grid or initialises first grid. 				
@@ -122,8 +142,8 @@ constructor
 		
 		grid_x1 = x_offset;
 		grid_y1 = y_offset;
-		grid_x2 = x_offset + (column_qty * cell_width	* x_scale);
-		grid_y2 = y_offset + (row_qty		* cell_height	* y_scale);
+		grid_x2 = x_offset + (column_qty	* cell_width	* x_scale);
+		grid_y2 = y_offset + (row_qty			* cell_height	* y_scale);
 
 		// Horizontal lines
 
@@ -149,13 +169,12 @@ constructor
 		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
+	        var _is_top_edge = (_row == 0); // top row also handles column headers below
+
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-	            // Cache the label values
+	            var _is_left_edge = (_column == 0); // left column also handles row headers below
 
-	            var _row_string			= label_text_type_row			? spt_convert_letters(_row		+ y_shift)	: string(_row		+ y_shift);
-	            var _column_string   = label_text_type_column	? spt_convert_letters(_column	+ x_shift)	: string(_column + x_shift);
-            
 	            // Calculate coordinates
 				
 	            var _x_pos = x_offset + (_column	* cell_width	* x_scale);
@@ -163,8 +182,35 @@ constructor
 
 	            var _x1 = _x_pos;
 	            var _y1 = _y_pos;
-	            var _x2 = _x_pos + (cell_width	* x_scale);
+	            var _x2 = _x_pos + (cell_width		* x_scale);
 	            var _y2 = _y_pos + (cell_height	* y_scale);
+
+	            // Only build a row label (left edge) when this cell is in column 0.
+
+	            var _row_string	= "";
+	            var _label_row_x	= 0;
+	            var _label_row_y	= 0;
+
+	            if (_is_left_edge)
+	            {
+	                _row_string	= label_text_type_row ? spt_convert_letters(_row + y_shift) : string(_row + y_shift);
+	                _label_row_x	= (_x1 - string_width(_row_string)) - label_text_grid_gap_row;
+	                _label_row_y	= _y1 + (cell_height * y_scale) / 2 - string_height(_row_string) / 2;
+	            }
+
+	            // Only build a column label (top edge) when this cell is in row 0.
+
+
+	            var _column_string	= "";
+	            var _label_column_x	= 0;
+	            var _label_column_y	= 0;
+
+	            if (_is_top_edge)
+	            {
+	                _column_string		= label_text_type_column ? spt_convert_letters(_column + x_shift) : string(_column + x_shift);
+	                _label_column_x	= _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2;
+	                _label_column_y	= (_y1 - string_height(_column_string)) - label_text_grid_gap_column;
+	            }
 
 	            // Store cell data
 				
@@ -180,13 +226,13 @@ constructor
                 
 	                // Left label
 					
-	                label_row_x : (_x1 - string_width(_row_string)) - label_text_grid_gap_row,
-	                label_row_y : _y1 + (cell_height * y_scale) / 2 - string_height(_row_string) / 2,
+	                label_row_x : _label_row_x,
+	                label_row_y : _label_row_y,
 
 	                // Top label
 					
-	                label_column_x : _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2,
-	                label_column_y : (_y1 - string_height(_column_string)) - label_text_grid_gap_column,
+	                label_column_x : _label_column_x,
+	                label_column_y : _label_column_y,
 					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
@@ -196,11 +242,6 @@ constructor
 					
 	                outline : true
 	            };
-            
-	            // Clear text from cells not on the edge
-				
-	            if (_row != 0)    cell_data[_row][_column].label_column_text = "";
-	            if (_column != 0) cell_data[_row][_column].label_row_text    = "";
 	        }
 	    }
 
@@ -235,7 +276,7 @@ constructor
     static shift_x = function(_value) 
     {
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
-		//set_grid();
+		set_grid();
 	}
 	
 	/// @function												shift_y
@@ -245,7 +286,7 @@ constructor
     static shift_y = function(_value) 
     {
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
-		//set_grid();
+		set_grid();
 	}
 	
 	/// @function										set_coords
@@ -273,6 +314,7 @@ constructor
 	static update_row = function(_value)
 	{
 		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+		clamp_shifts();			// row_qty changed — re-validate y_shift so labels don't go stale
 		set_grid();
 	}
 	
@@ -283,18 +325,19 @@ constructor
 	static update_column = function(_value)
 	{
 		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
+		clamp_shifts();				// column_qty changed — re-validate x_shift so labels don't go stale
 		set_grid();
 	}
 
-	/// @function										zoom
-	/// @description								Zooms in/out while preserving the grid's total on-screen size.
-	/// @param {Real}			_value		Amount to change scale by (e.g. 0.1 in, -0.1 out).
+	/// @function															zoom
+	/// @description													Zooms in/out while preserving the grid's total on-screen size.
+	/// @param			{Real}	_zoom_direction		Zoom in or out.
 
-	static zoom = function(_value)
+	static zoom = function(_zoom_direction = true)
 	{
-		if is_real(_value) // Sanatise input prevent error
+		if is_bool(_zoom_direction) // Sanatise input prevent error
 		{
-	        if (_value < 0)
+	        if _zoom_direction == false
 	        {
 	            // Zooming Out: halve the scale, double the row/column quantities
 				
@@ -361,12 +404,12 @@ constructor
     {
 		if mouse_wheel_down()
 		{
-			zoom(-0.1);
+			zoom(true);
 		}
 		
 		if mouse_wheel_up()
 		{
-			zoom(0.1);
+			zoom(false);
 		}
 		
 		if keyboard_check_pressed(vk_left)		then shift_x(-1);
@@ -377,7 +420,10 @@ constructor
 		set_coords(); 
 		set_cursor();
 	}
-				
+	
+	/// @function			draw
+    /// @description	Execute draw code for grid constructor instance.
+	
     static draw = function() 
     {
 		// One draw call for every outline in the grid.
@@ -389,9 +435,9 @@ constructor
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
 	            var _cache_data = cell_data[_row][_column];
-				
-	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, 0, cell_width, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
-	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, 0, cell_height, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
+
+	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, -1, -1, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
+	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, -1, -1, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
 	        }
 	    }
 	}
