@@ -1,16 +1,16 @@
-// CREATES A CONSTRUCTOR CLASS  FOR GENERATING A 2D GRID
+// CONSTRUCTOR CLASS FOR GENERATING A 2D GRID
 
 /// @description Generate 2D grid
 
-global.grid_list = [];							// Stores array of grid structs
+global.grid_list = [];				// Stores array of grid structs
 global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
-/// @description Soft limits
+// ---- Soft limits ----
 
 #macro  LIMIT_CELL_WIDTH_MIN 8
-#macro  LIMIT_CELL_WIDTH_MAX 1024
+#macro  LIMIT_CELL_WIDTH_MAX 512
 #macro  LIMIT_CELL_HEIGHT_MIN 8
-#macro  LIMIT_CELL_HEIGHT_MAX 1024
+#macro  LIMIT_CELL_HEIGHT_MAX 512
 
 #macro  LIMIT_ROW_QTY_MIN 1
 #macro  LIMIT_ROW_QTY_MAX 128
@@ -24,25 +24,25 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
 #macro LIMIT_X_SCALE_MIN 0.25
 #macro LIMIT_Y_SCALE_MIN 0.25
-#macro LIMIT_X_SCALE_MAX 4
-#macro LIMIT_Y_SCALE_MAX 4
+#macro LIMIT_X_SCALE_MAX 2
+#macro LIMIT_Y_SCALE_MAX 2
 
-/// @function grid()
+/// @function														grid()
 /// @constructor
-/// @description																					Generates a 2D grid based on parameters.
-/// @since																							    v0.1.0.
-/// @param {Real}							    [_x_offset]								The horizontal starting position (origin) top-left.
-/// @param {Real}							    [_y_offset]								The vertical starting position (origin) of the grid within the coordinate space.
-/// @param {Real}							    [_cell_width]							The width of an individual grid cell in pixels or units. 
-/// @param {Real}							    [_cell_height]							The height of an individual grid cell in pixels or units.
-/// @param {Real}							    [_row_qty]								Total number of rows.
-/// @param {Real}								[_column_qty]						Total number of columns.
-/// @param {bool}								[_label_text_type_row]			Determine if row label text should be represented as numbers or letters.
-/// @param {bool}								[_label_text_type_column]	Determine if column label text should be represented as numbers or letters.
-/// @param {Constant.Colour}			[_grid_colour]						Default label text colour.
-/// @param {Constant.Colour}			[_text_colour]						Default label text colour.
-/// @param {Constant.Colour}			[_text_colour_selected]		Selected label text colour.
-/// @returns {Struct}							                                                A new grid struct.					
+/// @description													Generates a 2D grid based on parameters.
+/// @since															v0.1.0.
+/// @param {Real}						[_x_offset]					The horizontal starting position (origin, top-left) of the grid.
+/// @param {Real}						[_y_offset]					The vertical starting position (origin, top-left) of the grid.
+/// @param {Real}						[_cell_width]				The width of an individual grid cell in pixels or units.
+/// @param {Real}						[_cell_height]				The height of an individual grid cell in pixels or units.
+/// @param {Real}						[_row_qty]					Total number of rows.
+/// @param {Real}						[_column_qty]				Total number of columns.
+/// @param {Bool}						[_label_text_type_row]		Whether row labels are rendered as letters (true) or numbers (false).
+/// @param {Bool}						[_label_text_type_column]	Whether column labels are rendered as letters (true) or numbers (false).
+/// @param {Constant.Colour}			[_grid_colour]				Colour of the grid lines.
+/// @param {Constant.Colour}			[_text_colour]				Default label text colour.
+/// @param {Constant.Colour}			[_text_colour_selected]		Label text colour when the row/column is under the cursor.
+/// @returns {Struct}												A new grid struct.
 
 function grid
 (
@@ -54,7 +54,7 @@ _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red
 )  
 constructor
 {
-	/// @description Calculation variables
+	// ---- Calculation variables ----
 	
 	x_scale = 1;
     y_scale = 1;
@@ -70,32 +70,32 @@ constructor
 	
 	cell_data = [];
 
-	// Vertex boundary cache (populated by set_grid) - declared here for discoverability
+	// Vertex boundary cache (populated by set_grid), declared here for discoverability.
 
 	grid_x1 = 0;
 	grid_y1 = 0;
 	grid_x2 = 0;
 	grid_y2 = 0;
 
-	/// @description Imported variables
+	// ---- Imported variables ----
 	
-    x_offset									= _x_offset;
-    y_offset									= _y_offset;
+    x_offset					= _x_offset;
+    y_offset					= _y_offset;
 		
-    cell_width								= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
-    cell_height								= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
+    cell_width					= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
+    cell_height					= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
         
-    row_qty									= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-    column_qty							= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
+    row_qty						= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
+    column_qty					= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
         
-    grid_colour							= _grid_colour;
-    text_colour							= _text_colour;
-	text_colour_selected				= _text_colour_selected;
+    grid_colour					= _grid_colour;
+    text_colour					= _text_colour;
+	text_colour_selected		= _text_colour_selected;
 		
-	label_text_type_row				= _label_text_type_row;
+	label_text_type_row			= _label_text_type_row;
 	label_text_type_column		= _label_text_type_column;
 		
-	/// @description Build the shared vertex format once, the first time any grid is created.
+	// Build the shared vertex format once, the first time any grid is created.
 	
 	if (is_undefined(global.grid_vformat))
 	{
@@ -106,13 +106,8 @@ constructor
 		global.grid_vformat = vertex_format_end();
 	}
 
-	/// @function											clamp_shifts
-	/// @description									Re-clamps x_shift/y_shift against the current row_qty/column_qty.
-	///                                                 Needed after update_row()/update_column() (or zoom, which changes
-	///                                                 row_qty/column_qty directly) since a shift that was valid for the
-	///                                                 old quantity can be out of range for the new one, which would
-	///                                                 otherwise leave stale/incorrect row or column labels showing
-	///                                                 until the next manual shift_x()/shift_y() call.
+	/// @function						clamp_shifts()
+	/// @description					Re-clamps x_shift/y_shift against the current row_qty/column_qty.
 
 	static clamp_shifts = function()
 	{
@@ -120,8 +115,8 @@ constructor
 		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
 	}
     
-    /// @function											set_grid
-    /// @description									Updates grid or initialises first grid. 				
+    /// @function						set_grid()
+    /// @description					Rebuilds the grid's vertex buffer and cell data from the current parameters.
 
 	static set_grid = function()
 	{
@@ -138,14 +133,14 @@ constructor
 		vbuff = vertex_create_buffer();
 		vertex_begin(vbuff, global.grid_vformat);
 		
-		// Calculate vertex boundries
+		// Calculate vertex boundaries.
 		
 		grid_x1 = x_offset;
 		grid_y1 = y_offset;
 		grid_x2 = x_offset + (column_qty	* cell_width	* x_scale);
 		grid_y2 = y_offset + (row_qty			* cell_height	* y_scale);
 
-		// Horizontal lines
+		// Horizontal lines.
 
 		for (var _row = 0; _row <= row_qty; ++_row)
 		{
@@ -155,7 +150,7 @@ constructor
 			vertex_position(vbuff, grid_x2, _y); vertex_colour(vbuff, grid_colour, 1);
 		}
 
-		// Vertical lines
+		// Vertical lines.
 
 		for (var _column = 0; _column <= column_qty; ++_column)
 		{
@@ -165,17 +160,17 @@ constructor
 			vertex_position(vbuff, _x, grid_y2); vertex_colour(vbuff, grid_colour, 1);
 		}
 		
-		// Build grid
+		// Build grid cells.
 		
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
-	        var _is_top_edge = (_row == 0); // top row also handles column headers below
+	        var _is_top_edge = (_row == 0); // Top row also handles column headers below.
 
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-	            var _is_left_edge = (_column == 0); // left column also handles row headers below
+	            var _is_left_edge = (_column == 0); // Left column also handles row headers below.
 
-	            // Calculate coordinates
+	            // Calculate coordinates.
 				
 	            var _x_pos = x_offset + (_column	* cell_width	* x_scale);
 	            var _y_pos = y_offset + (_row			* cell_height	* y_scale);
@@ -200,7 +195,6 @@ constructor
 
 	            // Only build a column label (top edge) when this cell is in row 0.
 
-
 	            var _column_string	= "";
 	            var _label_column_x	= 0;
 	            var _label_column_y	= 0;
@@ -212,7 +206,7 @@ constructor
 	                _label_column_y	= (_y1 - string_height(_column_string)) - label_text_grid_gap_column;
 	            }
 
-	            // Store cell data
+	            // Store cell data.
 				
 	            cell_data[_row][_column] =
 	            {
@@ -222,14 +216,14 @@ constructor
 	                y2 : _y2,
                 
 	                label_row_text		: _row_string,
-	                label_column_text : _column_string,
+	                label_column_text	: _column_string,
                 
-	                // Left label
+	                // Left label.
 					
 	                label_row_x : _label_row_x,
 	                label_row_y : _label_row_y,
 
-	                // Top label
+	                // Top label.
 					
 	                label_column_x : _label_column_x,
 	                label_column_y : _label_column_y,
@@ -246,32 +240,34 @@ constructor
 	    }
 
 		vertex_end(vbuff);
-		vertex_freeze(vbuff); // static geometry until the next set_grid() call — safe to freeze for a GPU-side speed boost
+		vertex_freeze(vbuff); // Static geometry until the next set_grid() call, so freezing is safe and gives a GPU-side speed boost.
 	}
 	
 	set_grid();
 	
-	/// @function			get_x
-	/// @description								Gets the selected X coordinate.
-	/// @parm				{Real}		 [_x]	Check row possition against X (mouse pointer by default).
+	/// @function						get_x()
+	/// @description					Gets the column index under the given X coordinate.
+	/// @param {Real}		[_x]		X coordinate to check (mouse pointer by default).
+	/// @returns {Real}					Column index, clamped to a valid range.
 
     static get_x = function(_x = mouse_x) 
     {
 		return clamp(floor((_x - x_offset) / (cell_width * x_scale)), 0, column_qty - 1);
 	}
 	
-	/// @function										get_y
-	/// @description								Gets the selected Y coordinate.
-	/// @parm				{Real}		[_y]		Check row possition against Y (mouse pointer by default).
+	/// @function						get_y()
+	/// @description					Gets the row index under the given Y coordinate.
+	/// @param {Real}		[_y]		Y coordinate to check (mouse pointer by default).
+	/// @returns {Real}					Row index, clamped to a valid range.
 
     static get_y = function(_y = mouse_y) 
     {
 		return clamp(floor((_y - y_offset) / (cell_height * y_scale)), 0, row_qty - 1);
 	}
 	
-	/// @function												shift_x
-	/// @description										Shift columns. (Negative values shift left)
-	/// @parm				{Real}			_value		New column shift value.
+	/// @function						shift_x()
+	/// @description					Shifts columns. (Negative values shift left.)
+	/// @param {Real}		_value		Amount to add to the current column shift.
 
     static shift_x = function(_value) 
     {
@@ -279,9 +275,9 @@ constructor
 		set_grid();
 	}
 	
-	/// @function												shift_y
-	/// @description										Shift rows. (Negative values shift up)
-	/// @parm				{Real}			_value		New row shift value.
+	/// @function						shift_y()
+	/// @description					Shifts rows. (Negative values shift up.)
+	/// @param {Real}		_value		Amount to add to the current row shift.
 	
     static shift_y = function(_value) 
     {
@@ -289,8 +285,8 @@ constructor
 		set_grid();
 	}
 	
-	/// @function										set_coords
-	/// @description								Highlights the row/column label under the given (or mouse) position.
+	/// @function						set_coords()
+	/// @description					Highlights the row/column labels under the current mouse position.
 
     static set_coords = function() 
     {
@@ -307,66 +303,67 @@ constructor
 		}
 	}
 	
-	/// @function										update_row
-	/// @description								Changes the number of rows.
-	/// @param {Real}			_value		Number of rows in new grid.
+	/// @function						update_row()
+	/// @description					Changes the number of rows.
+	/// @param {Real}		_value		Number of rows in the new grid.
 
 	static update_row = function(_value)
 	{
 		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-		clamp_shifts();			// row_qty changed — re-validate y_shift so labels don't go stale
+		clamp_shifts();			// row_qty changed - re-validate y_shift so labels don't go stale.
 		set_grid();
 	}
 	
-	/// @function										update_column
-	/// @description								Changes the number of columns.
-	/// @param {Real}			_value		Number of columns in new grid.
+	/// @function						update_column()
+	/// @description					Changes the number of columns.
+	/// @param {Real}		_value		Number of columns in the new grid.
 
 	static update_column = function(_value)
 	{
 		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-		clamp_shifts();				// column_qty changed — re-validate x_shift so labels don't go stale
+		
+		clamp_shifts();	// column_qty changed - re-validate x_shift so labels don't go stale.
 		set_grid();
 	}
 
-	/// @function															zoom
-	/// @description													Zooms in/out while preserving the grid's total on-screen size.
-	/// @param			{Real}	_zoom_direction		Zoom in or out.
+	/// @function						zoom()
+	/// @description					Zooms in/out while preserving the grid's total on-screen size.
+	/// @param {Bool}		[_zoom_direction]	True to zoom in, false to zoom out.
 
 	static zoom = function(_zoom_direction = true)
 	{
-		if is_bool(_zoom_direction) // Sanatise input prevent error
+		if is_bool(_zoom_direction) // Sanitise input to prevent an error.
 		{
 	        if _zoom_direction == false
 	        {
-	            // Zooming Out: halve the scale, double the row/column quantities
+	            // Zooming out: halve the scale, double the row/column quantities.
 				
 	            var _new_x_scale	= x_scale / 2;
 	            var _new_y_scale	= y_scale / 2;
-	            var _new_col			= column_qty * 2;
+	            var _new_col		= column_qty * 2;
 	            var _new_row		= row_qty * 2;
             
-	            // Check if the new state respects your absolute limits
+	            // Check if the new state respects the absolute limits.
 				
 	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
 	                _new_col <= LIMIT_COLUMN_QTY_MAX && _new_row <= LIMIT_ROW_QTY_MAX)
 	            {
-	                x_scale			= _new_x_scale;
-	                y_scale			= _new_y_scale;
+	                x_scale		= _new_x_scale;
+	                y_scale		= _new_y_scale;
 	                column_qty	= _new_col;
-	                row_qty			= _new_row;
+	                row_qty		= _new_row;
 	            }
 	        }
 				else
 	        {
-	            // Zooming In: double the scale, halve the row/column quantities
+	            // Zooming in: double the scale, halve the row/column quantities.
 				
 	            var _new_x_scale		= x_scale * 2;
 	            var _new_y_scale		= y_scale * 2;
-	            var _new_col				= round(column_qty / 2);
+	            var _new_col			= round(column_qty / 2);
 	            var _new_row			= round(row_qty / 2);
             
-	            // Check if the new state respects your absolute limits and won't hit zero cells
+	            // Check if the new state respects the absolute limits and won't hit zero cells.
 				
 	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
 	                _new_col >= LIMIT_COLUMN_QTY_MIN && _new_row >= LIMIT_ROW_QTY_MIN)
@@ -379,11 +376,11 @@ constructor
 			}
         }
        
-        set_grid(); // Rebuild the grid geometry
+        set_grid(); // Rebuild the grid geometry.
 	}
 
-	/// @function												set_cursor
-    /// @description										Set mouse pointer graphic
+	/// @function						set_cursor()
+    /// @description					Sets the mouse pointer graphic depending on whether the cursor is over the grid.
 	
     static set_cursor = function() 
     {
@@ -397,8 +394,37 @@ constructor
 		}
 	}
 
-	/// @function			step
-    /// @description	Execute step code for grid constructor instance.
+	/// @function											spt_convert_letters()
+	/// @description										Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
+	/// @param               _number		{Real}			The number to convert to a letter(s).
+	/// @param               _type			{Real}			The number to convert to a letter(s).
+	/// @return								{String}		Return letter.
+	/// @pure
+
+	function spt_convert_letters(_number)
+	{
+		if (!is_real(_number)) return undefined;
+
+	    var _val = floor(_number);
+	    var _prefix = (_val < 0) ? "-" : "";
+	    var _num = abs(_val);
+	
+		if _number > 0 then _num ++;
+
+	    var _string = "";
+	
+	    while (_num > 0)
+	    {
+	        _num -= 1; 
+	        _string = chr((_num mod 26) + 65) + _string;
+	        _num = _num div 26;
+	    }
+
+	    return _prefix + (_string == "" ? "A" : _string);
+	}
+
+	/// @function						step()
+    /// @description					Executes the step logic for this grid instance (input handling and state updates).
 	
     static step = function() 
     {
@@ -421,8 +447,8 @@ constructor
 		set_cursor();
 	}
 	
-	/// @function			draw
-    /// @description	Execute draw code for grid constructor instance.
+	/// @function						draw()
+    /// @description					Executes the draw logic for this grid instance (grid lines and labels).
 	
     static draw = function() 
     {
@@ -442,20 +468,20 @@ constructor
 	    }
 	}
 	
-	/// @function destroy()
-	/// @description Cleans up the instance from the global list and clears data
+	/// @function						destroy()
+	/// @description					Removes this instance from the global grid list and frees its resources.
 	
 	static destroy = function() 
 	{
-	    // Find the current instance's index in the global array
+	    // Find the current instance's index in the global array.
 		
 	    var _index = array_get_index(global.grid_list, self);
     
-	    // Only remove if it actually exists in the array
+	    // Only remove if it actually exists in the array.
 		
 	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
     
-	    cell_data = undefined; // Clear cell data
+	    cell_data = undefined; // Clear cell data.
 
 		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
 		
@@ -466,5 +492,5 @@ constructor
 		}
 	}
 	
-    array_push(global.grid_list, self); // Add copy of self to grid array.
+    array_push(global.grid_list, self); // Add this instance to the global grid list.
 }

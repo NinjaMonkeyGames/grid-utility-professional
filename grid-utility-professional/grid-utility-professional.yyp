@@ -15,13 +15,12 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2026.0.0.16",
+    "IDEVersion":"2026.100.0.1110",
   },
   "name":"grid-utility-professional",
   "resources":[
     {"id":{"name":"obj_grid_controller","path":"objects/obj_grid_controller/obj_grid_controller.yy",},},
     {"id":{"name":"rm_main","path":"rooms/rm_main/rm_main.yy",},},
-    {"id":{"name":"spt_pure_functions","path":"scripts/spt_pure_functions/spt_pure_functions.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
