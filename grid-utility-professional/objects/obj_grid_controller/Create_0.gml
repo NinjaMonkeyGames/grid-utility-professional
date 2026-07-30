@@ -56,6 +56,8 @@ constructor
 {
 	// ---- Calculation variables ----
 	
+	cell_data = []; // Initialise cell data.
+	
 	x_scale = 1;
     y_scale = 1;
 		
@@ -108,6 +110,7 @@ constructor
 
 	/// @function						clamp_shifts()
 	/// @description					Re-clamps x_shift/y_shift against the current row_qty/column_qty.
+	/// @since							v0.1.0.
 
 	static clamp_shifts = function()
 	{
@@ -117,6 +120,7 @@ constructor
     
     /// @function						set_grid()
     /// @description					Rebuilds the grid's vertex buffer and cell data from the current parameters.
+	/// @since							v0.1.0.
 
 	static set_grid = function()
 	{
@@ -247,6 +251,7 @@ constructor
 	
 	/// @function						get_x()
 	/// @description					Gets the column index under the given X coordinate.
+	/// @since							v0.1.0.
 	/// @param {Real}		[_x]		X coordinate to check (mouse pointer by default).
 	/// @returns {Real}					Column index, clamped to a valid range.
 
@@ -257,6 +262,7 @@ constructor
 	
 	/// @function						get_y()
 	/// @description					Gets the row index under the given Y coordinate.
+	/// @since							v0.1.0.
 	/// @param {Real}		[_y]		Y coordinate to check (mouse pointer by default).
 	/// @returns {Real}					Row index, clamped to a valid range.
 
@@ -267,6 +273,7 @@ constructor
 	
 	/// @function						shift_x()
 	/// @description					Shifts columns. (Negative values shift left.)
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Amount to add to the current column shift.
 
     static shift_x = function(_value) 
@@ -277,6 +284,7 @@ constructor
 	
 	/// @function						shift_y()
 	/// @description					Shifts rows. (Negative values shift up.)
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Amount to add to the current row shift.
 	
     static shift_y = function(_value) 
@@ -287,6 +295,7 @@ constructor
 	
 	/// @function						set_coords()
 	/// @description					Highlights the row/column labels under the current mouse position.
+	/// @since							v0.1.0.
 
     static set_coords = function() 
     {
@@ -305,6 +314,7 @@ constructor
 	
 	/// @function						update_row()
 	/// @description					Changes the number of rows.
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Number of rows in the new grid.
 
 	static update_row = function(_value)
@@ -316,6 +326,7 @@ constructor
 	
 	/// @function						update_column()
 	/// @description					Changes the number of columns.
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Number of columns in the new grid.
 
 	static update_column = function(_value)
@@ -328,7 +339,8 @@ constructor
 
 	/// @function						zoom()
 	/// @description					Zooms in/out while preserving the grid's total on-screen size.
-	/// @param {Bool}		[_zoom_direction]	True to zoom in, false to zoom out.
+	/// @since							v0.1.0.
+	/// @param {Bool}[_zoom_direction]	True to zoom in, false to zoom out.
 
 	static zoom = function(_zoom_direction = true)
 	{
@@ -381,6 +393,7 @@ constructor
 
 	/// @function						set_cursor()
     /// @description					Sets the mouse pointer graphic depending on whether the cursor is over the grid.
+	/// @since							v0.1.0.
 	
     static set_cursor = function() 
     {
@@ -396,6 +409,7 @@ constructor
 
 	/// @function											spt_convert_letters()
 	/// @description										Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
+	/// @since												v0.1.0.
 	/// @param               _number		{Real}			The number to convert to a letter(s).
 	/// @param               _type			{Real}			The number to convert to a letter(s).
 	/// @return								{String}		Return letter.
@@ -425,6 +439,7 @@ constructor
 
 	/// @function						step()
     /// @description					Executes the step logic for this grid instance (input handling and state updates).
+	/// @since							v0.1.0.
 	
     static step = function() 
     {
@@ -449,6 +464,7 @@ constructor
 	
 	/// @function						draw()
     /// @description					Executes the draw logic for this grid instance (grid lines and labels).
+	/// @since							v0.1.0.
 	
     static draw = function() 
     {
@@ -470,6 +486,7 @@ constructor
 	
 	/// @function						destroy()
 	/// @description					Removes this instance from the global grid list and frees its resources.
+	/// @since							v0.1.0.
 	
 	static destroy = function() 
 	{
