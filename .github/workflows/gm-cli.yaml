@@ -1,17 +1,33 @@
-# Test if GameMaker Project can be compiled without error.
-
-name: gm-cli
+name: GM-CLI Feature Branch Unit Tests
 
 on:
   workflow_call:
+    # Receives the call from CI Controller
 jobs:
-  build-test:
+  run-unit-tests:
+    name: Compile and Run Unit Tests Headless
     runs-on: ubuntu-latest
+    
+    # --privileged allows unshare, chroot, and mount operations
     container:
-      image: monkeyknuckles/gm-cli
-    steps:
-      - uses: actions/checkout@v6
+      image: monkeyknuckles/gm-cli:latest
+      options: --privileged
 
-      - name: Run gm-cli
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Install Project Dependencies
+        run: |
+          npm install
+
+      - name: Execute Tests Under Virtual Framebuffer
         working-directory: ./grid-utility-professional
-        run: npx gm-cli compile
+        env:
+          DISPLAY: :99
+        run: |
+          # Spin up virtual X11 framebuffer for graphics services
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 2
+          # Run the compiled project so internal unit tests can execute
+          npx @gamemaker/gm-cli@latest run
