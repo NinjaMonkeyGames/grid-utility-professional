@@ -54,7 +54,31 @@ _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red
 )  
 constructor
 {
-		/// @function																					sanitise_input()
+	// ---- Calculation variables ----
+	
+	cell_data = []; // Initialise cell data.
+	is_destroyed = false; // Set true by destroy() - guarded methods check this before running.
+	
+	x_scale = 1;
+    y_scale = 1;
+		
+	x_shift = 0;
+	y_shift = 0;
+		
+	label_text_grid_gap_column = 6;
+	label_text_grid_gap_row = 12;
+
+	vbuff = -1;
+	cache_cursor = window_get_cursor();
+
+	// Vertex boundary cache (populated by set_grid), declared here for discoverability.
+
+	grid_x1 = 0;
+	grid_y1 = 0;
+	grid_x2 = 0;
+	grid_y2 = 0;
+
+	/// @function																					sanitise_input()
 	/// @description																			Sanitises bad arguments and throws error.
 	/// @since																						v0.1.0.
 	/// @param {Real}						_x_offset								The horizontal starting position (origin, top-left) of the grid.
@@ -98,13 +122,13 @@ constructor
 		
 		// Whole number checks
 		
-		if frac(_cell_width)		!= 0					then throw("_CELL_WIDTH MUST BE A WHOLE NUMBER");
-		if frac(_cell_height)	!= 0					then throw("_CELL_HEIGHT MUST BE A WHOLE NUMBER");
+		if frac(_cell_width) != 0							then throw("_CELL_WIDTH MUST BE A WHOLE NUMBER");
+		if frac(_cell_height) != 0						then throw("_CELL_HEIGHT MUST BE A WHOLE NUMBER");
 		
-		if frac(_row_qty)		!= 0					then throw("_ROW_QTY MUST BE A WHOLE NUMBER");
-		if frac(_column_qty)	!= 0					then throw("_COLUMN_QTY MUST BE A WHOLE NUMBER");
+		if frac(_row_qty) != 0								then throw("_ROW_QTY MUST BE A WHOLE NUMBER");
+		if frac(_column_qty) != 0						then throw("_COLUMN_QTY MUST BE A WHOLE NUMBER");
 		
-		// Range checks (fixed - was previously checking against LIMIT_CELL_WIDTH_MIN/MAX for row/column qty)
+		// Range checks
 		
 		if _cell_width						< LIMIT_CELL_WIDTH_MIN		||	_cell_width						>  LIMIT_CELL_WIDTH_MAX		then throw("_CELL_WIDTH");
 		if _cell_height					< LIMIT_CELL_HEIGHT_MIN		||	 _cell_height					>  LIMIT_CELL_HEIGHT_MAX		then throw("_CELL_HEIGHT");
@@ -116,32 +140,11 @@ constructor
 		if _text_colour					< 0												||	 _text_colour					> 16777215									then throw("_TEXT_COLOUR");
 		if _text_colour_selected	< 0												||	_text_colour_selected	> 16777215									then throw("_TEXT_COLOUR_SELECTED");
 		
-	}
+	};
+	
+	// Validate raw arguments BEFORE anything (including clamp()) touches them.
 	
 	santise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected);
-	
-	// ---- Calculation variables ----
-	
-	cell_data = []; // Initialise cell data.
-	
-	x_scale = 1;
-    y_scale = 1;
-		
-	x_shift = 0;
-	y_shift = 0;
-		
-	label_text_grid_gap_column = 6;
-	label_text_grid_gap_row = 12;
-
-	vbuff = -1;
-	cache_cursor = window_get_cursor();
-
-	// Vertex boundary cache (populated by set_grid), declared here for discoverability.
-
-	grid_x1 = 0;
-	grid_y1 = 0;
-	grid_x2 = 0;
-	grid_y2 = 0;
 
 	// ---- Imported variables ----
 	
@@ -170,7 +173,17 @@ constructor
 		vertex_format_add_colour();
 		
 		global.grid_vformat = vertex_format_end();
-	}
+	};
+
+	/// @function						guard_alive()
+	/// @description				Throws if this instance has already been destroyed. Single source of truth for the.
+	///										use-after-destroy check - call at the top of any method that reads cell_data/vbuff or mutates grid state.
+	/// @since							v0.1.0.
+
+	static guard_alive = function()
+	{
+		if (is_destroyed) then throw("GRID INSTANCE HAS BEEN DESTROYED");
+	};
 
 	/// @function						clamp_shifts()
 	/// @description				Re-clamps x_shift/y_shift against the current row_qty/column_qty.
@@ -188,6 +201,8 @@ constructor
 
 	static set_grid = function()
 	{
+		guard_alive();
+
 		cell_data = [];
 
 		// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
@@ -196,7 +211,7 @@ constructor
 		{
 			vertex_delete_buffer(vbuff);
 			vbuff = -1;
-		}
+		};
 
 		vbuff = vertex_create_buffer();
 		vertex_begin(vbuff, global.grid_vformat);
@@ -216,7 +231,7 @@ constructor
 
 			vertex_position(vbuff, grid_x1, _y); vertex_colour(vbuff, grid_colour, 1);
 			vertex_position(vbuff, grid_x2, _y); vertex_colour(vbuff, grid_colour, 1);
-		}
+		};
 
 		// Vertical lines.
 
@@ -226,7 +241,7 @@ constructor
 
 			vertex_position(vbuff, _x, grid_y1); vertex_colour(vbuff, grid_colour, 1);
 			vertex_position(vbuff, _x, grid_y2); vertex_colour(vbuff, grid_colour, 1);
-		}
+		};
 		
 		// Build grid cells.
 		
@@ -259,7 +274,7 @@ constructor
 	                _row_string	= label_text_type_row ? spt_convert_letters(_row + y_shift) : string(_row + y_shift);
 	                _label_row_x	= (_x1 - string_width(_row_string)) - label_text_grid_gap_row;
 	                _label_row_y	= _y1 + (cell_height * y_scale) / 2 - string_height(_row_string) / 2;
-	            }
+	            };
 
 	            // Only build a column label (top edge) when this cell is in row 0.
 
@@ -272,7 +287,7 @@ constructor
 	                _column_string		= label_text_type_column ? spt_convert_letters(_column + x_shift) : string(_column + x_shift);
 	                _label_column_x	= _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2;
 	                _label_column_y	= (_y1 - string_height(_column_string)) - label_text_grid_gap_column;
-	            }
+	            };
 
 	            // Store cell data.
 				
@@ -321,6 +336,7 @@ constructor
 
     static get_x = function(_x = mouse_x) 
     {
+		guard_alive();
 		return clamp(floor((_x - x_offset) / (cell_width * x_scale)), 0, floor(column_qty) - 1);
 	}
 	
@@ -332,6 +348,7 @@ constructor
 
     static get_y = function(_y = mouse_y) 
     {
+		guard_alive();
 		return clamp(floor((_y - y_offset) / (cell_height * y_scale)), 0, floor(row_qty) - 1);
 	}
 	
@@ -342,6 +359,8 @@ constructor
 
     static shift_x = function(_value) 
     {
+		guard_alive();
+
 		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
@@ -356,6 +375,8 @@ constructor
 	
     static shift_y = function(_value) 
     {
+		guard_alive();
+
 		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
@@ -369,6 +390,8 @@ constructor
 
     static set_coords = function() 
     {
+		guard_alive();
+
 		var _select_x = get_x();
 		var _select_y = get_y();
 
@@ -389,6 +412,8 @@ constructor
 
 	static update_row = function(_value)
 	{
+		guard_alive();
+
 		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
@@ -404,6 +429,8 @@ constructor
 
 	static update_column = function(_value)
 	{
+		guard_alive();
+
 		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
@@ -420,6 +447,8 @@ constructor
 
 	static zoom = function(_zoom_direction = true)
 	{
+		guard_alive();
+
 		if is_bool(_zoom_direction) // Sanitise input to prevent an error.
 		{
 	        if _zoom_direction == false
@@ -464,7 +493,8 @@ constructor
 			}
         }
        
-        set_grid(); // Rebuild the grid geometry.
+        clamp_shifts();	// row_qty/column_qty may have changed - re-validate x_shift/y_shift.
+        set_grid();			// Rebuild the grid geometry.
 	}
 
 	/// @function					set_cursor()
@@ -473,6 +503,8 @@ constructor
 	
     static set_cursor = function() 
     {
+		guard_alive();
+
 		if point_in_rectangle(mouse_x, mouse_y, grid_x1, grid_y1, grid_x2, grid_y2)
 		{
 			window_set_cursor(cr_handpoint) 
@@ -487,7 +519,6 @@ constructor
 	/// @description											Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
 	/// @since														v0.1.0.
 	/// @param               _number	{Real}			The number to convert to a letter(s).
-	/// @param               _type		{Real}			The number to convert to a letter(s).
 	/// @return								{String}		Return letter.
 	/// @pure
 
@@ -519,6 +550,8 @@ constructor
 	
     static step = function() 
     {
+		guard_alive();
+
 		if mouse_wheel_down()
 		{
 			zoom(true);
@@ -544,6 +577,8 @@ constructor
 	
     static draw = function() 
     {
+		guard_alive();
+
 		// One draw call for every outline in the grid.
 
 		vertex_submit(vbuff, pr_linelist, -1);
@@ -561,11 +596,13 @@ constructor
 	}
 	
 	/// @function						destroy()
-	/// @description				Removes this instance from the global grid list and frees its resources.
+	/// @description				Removes this instance from the global grid list, frees GPU resources, and wipes all instance data.
 	/// @since							v0.1.0.
 	
 	static destroy = function() 
 	{
+	    if (is_destroyed) then return; // Already destroyed - safe no-op.
+
 	    // Find the current instance's index in the global array.
 		
 	    var _index = array_get_index(global.grid_list, self);
@@ -573,8 +610,6 @@ constructor
 	    // Only remove if it actually exists in the array.
 		
 	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
-    
-	    cell_data = undefined; // Clear cell data.
 
 		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
 		
@@ -582,6 +617,25 @@ constructor
 		{
 			vertex_delete_buffer(vbuff);
 			vbuff = -1;
+		}
+
+		is_destroyed = true; // Set before the generic wipe below, since the wipe would otherwise erase it too.
+
+		// Generically blank every remaining data field, so destroy() doesn't need
+		// manual upkeep whenever a new variable is added to the constructor.
+		// Methods are left intact so guard_alive() can still fire a clean error
+		// on any call made after destruction, instead of a raw "undefined function" crash.
+
+		var _names = variable_struct_get_names(self);
+
+		for (var _i = 0; _i < array_length(_names); ++_i)
+		{
+			var _name = _names[_i];
+
+			if (_name == "is_destroyed")						continue;
+			if (is_method(variable_struct_get(self, _name)))	continue;
+
+			variable_struct_set(self, _name, undefined);
 		}
 	}
 	
