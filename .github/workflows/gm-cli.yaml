@@ -5,7 +5,7 @@ on:
     # Receives the call from CI Controller
 jobs:
   run-unit-tests:
-    name: Compile and Run Unit Tests Headless
+    name: Run Unit Tests Headless
     runs-on: ubuntu-latest
     
     # --privileged allows unshare, chroot, and mount operations
@@ -29,5 +29,12 @@ jobs:
           # Spin up virtual X11 framebuffer for graphics services
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 2
-          # Run the compiled project so internal unit tests can execute
-          npx @gamemaker/gm-cli@latest run
+          
+          # Run tests, print verbose output to the screen, and save it to test_output.log
+          npx @gamemaker/gm-cli@latest run --verbose 2>&1 | tee test_output.log || true
+
+      - name: Evaluate Test Output with gm-fail.sh
+        run: |
+          # Grant execution permissions and run the root-level script
+          chmod +x ./gm-fail.sh
+          ./gm-fail.sh ./grid-utility-professional/test_output.log
