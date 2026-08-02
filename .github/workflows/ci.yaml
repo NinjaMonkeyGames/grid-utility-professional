@@ -1,49 +1,41 @@
-# CI controller manages which jobs are run in which environment
-
-name: Environment Deployment Router
+name: GM-CLI Feature Branch Unit Tests
 
 on:
-  push:
-    branches:
-      - master
-      - develop
-      - 'feature/**'
-
+  workflow_call:
+    # Receives the call from CI Controller
 jobs:
-  # 1. Detect the environment based on your branching strategy
-  detect-environment:
+  run-unit-tests:
+    name: Compile and Run Unit Tests Headless
     runs-on: ubuntu-latest
-    outputs:
-      env: ${{ steps.branch-check.outputs.env }}
+    
+    # --privileged allows unshare, chroot, and mount operations
+    container:
+      image: monkeyknuckles/gm-cli:latest
+      options: --privileged
+
     steps:
-      - name: Check branch and set environment
-        id: branch-check
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Install Project Dependencies
         run: |
-          if [[ "${{ github.ref_name }}" == "master" ]]; then
-            echo "env=production" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref_name }}" == "develop" ]]; then
-            echo "env=development" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref_name }}" == feature/** ]]; then
-            echo "env=preview" >> $GITHUB_OUTPUT
-          else
-            echo "env=unknown" >> $GITHUB_OUTPUT
-          fi
+          npm install
 
-  # 2. Call the respective reusable workflows
-  call-preview:
-    needs: detect-environment
-    if: needs.detect-environment.outputs.env == 'preview'
-    uses: ./.github/workflows/preview.yaml
-    secrets: inherit
+      - name: Execute Tests Under Virtual Framebuffer
+        working-directory: ./grid-utility-professional
+        env:
+          DISPLAY: :99
+        run: |
+          # Spin up virtual X11 framebuffer for graphics services
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 2
+          # Run the compiled project so internal unit tests can execute
+          npx @gamemaker/gm-cli@latest run
 
-  call-development:
-    needs: detect-environment
-    if: needs.detect-environment.outputs.env == 'development'
-    uses: ./.github/workflows/development.yaml
-    secrets: inherit
-
-  call-production:
-    needs: detect-environment
-    if: needs.detect-environment.outputs.env == 'production'
-    uses: ./.github/workflows/production.yaml
-    secrets: inherit
+      - name: Execute Tests via Script
+        working-directory: ./grid-utility-professional
+        env:
+          DISPLAY: :99
+        run: |
+          # Make sure the script is executable (or run it via bash explicitly)
+          bash ../gml-fail.sh
