@@ -271,7 +271,7 @@ constructor
 
 	            if (_is_left_edge)
 	            {
-	                _row_string	= label_text_type_row ? spt_convert_letters(_row + y_shift) : string(_row + y_shift);
+	                _row_string	= label_text_type_row ? convert_letters(_row + y_shift) : string(_row + y_shift);
 	                _label_row_x	= (_x1 - string_width(_row_string)) - label_text_grid_gap_row;
 	                _label_row_y	= _y1 + (cell_height * y_scale) / 2 - string_height(_row_string) / 2;
 	            };
@@ -284,7 +284,7 @@ constructor
 
 	            if (_is_top_edge)
 	            {
-	                _column_string		= label_text_type_column ? spt_convert_letters(_column + x_shift) : string(_column + x_shift);
+	                _column_string		= label_text_type_column ? convert_letters(_column + x_shift) : string(_column + x_shift);
 	                _label_column_x	= _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2;
 	                _label_column_y	= (_y1 - string_height(_column_string)) - label_text_grid_gap_column;
 	            };
@@ -455,10 +455,10 @@ constructor
 	        {
 	            // Zooming out: halve the scale, double the row/column quantities.
 				
-	            var _new_x_scale	= x_scale		/ 2;
-	            var _new_y_scale	= y_scale		/ 2;
-	            var _new_col		= column_qty	* 2;
-	            var _new_row		= row_qty		* 2;
+	            var _new_x_scale	= x_scale			/ 2;
+	            var _new_y_scale	= y_scale			/ 2;
+	            var _new_col			= column_qty	* 2;
+	            var _new_row		= row_qty			* 2;
             
 	            // Check if the new state respects the absolute limits.
 				
@@ -493,8 +493,8 @@ constructor
 			}
         }
        
-        clamp_shifts();	// row_qty/column_qty may have changed - re-validate x_shift/y_shift.
-        set_grid();			// Rebuild the grid geometry.
+        clamp_shifts();			// row_qty/column_qty may have changed - re-validate x_shift/y_shift.
+        set_grid();					// Rebuild the grid geometry.
 	}
 
 	/// @function					set_cursor()
@@ -507,7 +507,7 @@ constructor
 
 		if point_in_rectangle(mouse_x, mouse_y, grid_x1, grid_y1, grid_x2, grid_y2)
 		{
-			window_set_cursor(cr_handpoint) 
+			window_set_cursor(cr_handpoint) ;
 		}
 			else
 		{
@@ -515,14 +515,13 @@ constructor
 		}
 	}
 
-	/// @function													spt_convert_letters()
+	/// @function													convert_letters()
 	/// @description											Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
 	/// @since														v0.1.0.
 	/// @param               _number	{Real}			The number to convert to a letter(s).
 	/// @return								{String}		Return letter.
-	/// @pure
 
-	function spt_convert_letters(_number)
+	static convert_letters = function(_number)
 	{
 		if (!is_real(_number)) return undefined;
 
@@ -609,7 +608,7 @@ constructor
     
 	    // Only remove if it actually exists in the array.
 		
-	    if (_index != -1) { array_delete(global.grid_list, _index, 1); }
+	    if (_index != -1) { array_delete(global.grid_list, _index, 1); };
 
 		// Free the vertex buffer - otherwise this leaks GPU memory every time a grid is destroyed.
 		
