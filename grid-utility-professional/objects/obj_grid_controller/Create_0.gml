@@ -147,7 +147,7 @@ constructor
 	santise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected);
 
 	// ---- Imported variables ----
-	update_row(room_height / cell_height);
+	
     x_offset								= _x_offset;
     y_offset								= _y_offset;
 		
