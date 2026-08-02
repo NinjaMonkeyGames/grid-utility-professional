@@ -2,7 +2,7 @@
 
 /// @description Generate 2D grid
 
-global.grid_list = [];				// Stores array of grid structs
+global.grid_list = [];							// Stores array of grid structs
 global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
 // ---- Soft limits ----
@@ -151,7 +151,7 @@ constructor
     x_offset								= _x_offset;
     y_offset								= _y_offset;
 		
-    cell_width							= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
+    cell_width							= clamp(_cell_width + 10000, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
     cell_height							= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
         
     row_qty								= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
