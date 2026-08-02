@@ -1,6 +1,8 @@
 # README
 
 <!-- markdownlint-disable MD013 -->
+[![Commitlint](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml/badge.svg)](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml)
+[![Markdownlint](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml/badge.svg)](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml)
 [![Unit Test](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml/badge.svg?branch=feature%2Fcore&event=push)](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml)
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
 ![Signed Commits](https://img.shields.io/badge/commits-signed-blue.svg)
