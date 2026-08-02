@@ -1,7 +1,7 @@
 # README
 
 <!-- markdownlint-disable MD013 -->
-
+[![Unit Test](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml/badge.svg?branch=feature%2Fcore&event=push)](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml)
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
 ![Signed Commits](https://img.shields.io/badge/commits-signed-blue.svg)
 ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
