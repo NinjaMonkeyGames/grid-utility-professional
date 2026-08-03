@@ -1,0 +1,48 @@
+# CI controller manages which jobs are run in which environment
+
+name: Environment Deployment Router
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - 'feature/**'
+
+jobs:
+  # 1. Detect the environment based on your branching strategy
+  detect-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.branch-check.outputs.env }}
+    steps:
+      - name: Check branch and set environment
+        id: branch-check
+        run: |
+          if [[ "${{ github.ref_name }}" == "master" ]]; then
+            echo "env=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "develop" ]]; then
+            echo "env=development" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == feature/** ]]; then
+            echo "env=preview" >> $GITHUB_OUTPUT
+          else
+            echo "env=unknown" >> $GITHUB_OUTPUT
+          fi
+  # 2. Call the respective reusable workflows
+  call-preview:
+    needs: detect-environment
+    if: needs.detect-environment.outputs.env == 'preview'
+    uses: ./.github/workflows/preview.yaml
+    secrets: inherit
+
+  call-development:
+    needs: detect-environment
+    if: needs.detect-environment.outputs.env == 'development'
+    uses: ./.github/workflows/development.yaml
+    secrets: inherit
+
+  call-production:
+    needs: detect-environment
+    if: needs.detect-environment.outputs.env == 'production'
+    uses: ./.github/workflows/production.yaml
+    secrets: inherit
