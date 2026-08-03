@@ -1,6 +1,6 @@
 // INITIALISE PROJECT
 
-global.debug_enabled  = false;
+global.debug_enabled  = true;
 
 window_set_caption("Grid Utility Professional v" + GM_version);								// Set window caption text.
 global.grid_controller = instance_create_layer(0, 0, "lyr_gui", obj_grid_controller);	// Generate instance of grid controller object.
