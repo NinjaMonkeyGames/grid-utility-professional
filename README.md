@@ -7,7 +7,7 @@
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
 ![Signed Commits](https://img.shields.io/badge/commits-signed-blue.svg)
 ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
-![GitHub Release](https://img.shields.io/github/v/release/NinjaMonkeyGames/REPLACE)
+![GitHub Release](https://img.shields.io/github/v/release/NinjaMonkeyGames/grid-utility-professional)
 
 ---
 
