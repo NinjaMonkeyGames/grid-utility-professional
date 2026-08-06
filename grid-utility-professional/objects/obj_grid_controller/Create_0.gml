@@ -42,21 +42,25 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 /// @param {Constant.Colour}	[_grid_colour]						Colour of the grid lines.
 /// @param {Constant.Colour}	[_text_colour]						Default label text colour.
 /// @param {Constant.Colour}	[_text_colour_selected]		Label text colour when the row/column is under the cursor.
+/// @param {Array}						[_tile_data]								A struct containing tilemap data. (sprite, index, angle).
 /// @returns {Struct}																	A new grid struct.
 
 function grid
 (
 _x_offset = 32, _y_offset = 32, 
-_cell_width = 64, _cell_height = 64, 
-_row_qty = 18, _column_qty = 24, 
+_cell_width = 256, _cell_height = 256, 
+_row_qty = 8, _column_qty = 12, 
 _label_text_type_row = false, _label_text_type_column = true,
-_grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red
+_grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red,
+_tile_data = undefined
 )  
 constructor
 {
 	// ---- Calculation variables ----
 	
 	cell_data = []; // Initialise cell data.
+	tile_data = _tile_data;
+	
 	is_destroyed = false; // Set true by destroy() - guarded methods check this before running.
 	
 	x_scale = 1;
@@ -92,6 +96,7 @@ constructor
 	/// @param {Constant.Colour}	_grid_colour							Colour of the grid lines.
 	/// @param {Constant.Colour}	_text_colour							Default label text colour.
 	/// @param {Constant.Colour}	_text_colour_selected			Label text colour when the row/column is under the cursor.
+	/// @param {Array}						[_tile_data]								A struct containing tilemap data. (sprite, index, angle).
 
 	static sanatise_input = function
 	(
@@ -99,7 +104,8 @@ constructor
 	_cell_width, _cell_height, 
 	_row_qty, _column_qty, 
 	_label_text_type_row, _label_text_type_column,
-	_grid_colour, _text_colour, _text_colour_selected
+	_grid_colour, _text_colour, _text_colour_selected,
+	_tile_data
 	)
 	{ 
 		// Data type checks
@@ -113,8 +119,8 @@ constructor
 		if !is_real(_row_qty)								then throw("ROW_QTY MUST BE A NUMBER");
 		if !is_real(_column_qty)						then throw("COLUMN_QTY MUST BE A NUMBER");
 		
-		if !is_bool(_label_text_type_row)			then throw("ROW_QTY MUST BE BOOLEAN");
-		if !is_bool(_label_text_type_column)	then throw("COLUMN_QTY MUST BE A BOOLEAN");
+		if !is_bool(_label_text_type_row)			then throw("LABEL TEXT TYPE ROW MUST BE BOOLEAN");
+		if !is_bool(_label_text_type_column)	then throw("LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN");
 		
 		if !is_real(_grid_colour)							then throw("GRID COLOUR MUST BE A COLOUR");
 		if !is_real(_text_colour)							then throw("TEXT COLOUR MUST BE A COLOUR");
@@ -140,11 +146,51 @@ constructor
 		if _text_colour					< 0												||	 _text_colour					> 16777215									then throw("_TEXT_COLOUR");
 		if _text_colour_selected	< 0												||	_text_colour_selected	> 16777215									then throw("_TEXT_COLOUR_SELECTED");
 		
+		var _tile_data_row_qty = array_length(_tile_data[0]);
+		var _tile_data_column_qty = array_length(_tile_data);
+		
+		if !is_array(_tile_data) then throw("_TILE_DATA MUST BE AN ARRAY");
+		
+		for (var _j = 0; _j < _tile_data_row_qty; ++_j) 
+		{
+		    for (var _i = 0; _i < _tile_data_column_qty; ++_i) 
+			{
+				var _message = undefined;
+				
+				//  Check datatypes
+				
+				 _message =string("BAD SPRITE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if spt_get_asset_type_as_string(_tile_data[_i][_j].sprite) != "sprite" then throw(_message);
+				
+				_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if !is_real(tile_data[_i][_j].index) then throw(_message);
+				
+				_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if !is_real(tile_data[_i][_j].angle) then throw(_message);
+				
+				_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if !is_real(tile_data[_i][_j].alpha) then throw(_message);
+				
+				// Check ranges
+				
+				_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if tile_data[_i][_j].index < 0 || tile_data[_i][_j].index > sprite_get_number( tile_data[_i][_j].sprite)  then throw(_message);
+				
+				_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if tile_data[_i][_j].angle < 0 || tile_data[_i][_j].angle > 359  then throw(_message);
+				
+			}
+		}
+		
+		
+	
+		
+		
 	};
 	
 	// Validate raw arguments BEFORE anything (including clamp()) touches them.
 	
-	sanatise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected);
+	sanatise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected, _tile_data);
 
 	// ---- Imported variables ----
 	
@@ -288,7 +334,7 @@ constructor
 	                _label_column_x	= _x1 + (cell_width * x_scale) / 2 - string_width(_column_string) / 2;
 	                _label_column_y	= (_y1 - string_height(_column_string)) - label_text_grid_gap_column;
 	            };
-
+				
 	            // Store cell data.
 				
 	            cell_data[_row][_column] =
@@ -298,8 +344,8 @@ constructor
 	                x2 : _x2,
 	                y2 : _y2,
                 
-	                label_row_text		: _row_string,
-	                label_column_text	: _column_string,
+	                label_row_text : _row_string,
+	                label_column_text : _column_string,
                 
 	                // Left label.
 					
@@ -311,13 +357,17 @@ constructor
 	                label_column_x : _label_column_x,
 	                label_column_y : _label_column_y,
 					
+					// Label colour
+					
 	                label_text_colour_x : c_white,
 	                label_text_colour_y : c_white,
+					
+					// Label alpha
 					
 	                label_text_x_alpha  : 1,
 	                label_text_y_alpha  : 1,
 					
-	                outline : true
+	                outline : true,
 	            };
 	        }
 	    }
@@ -590,7 +640,11 @@ constructor
 
 	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, -1, -1, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
 	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, -1, -1, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
-	        }
+				
+				//var _cache_tile_data = tile_data[_row][_column];
+				
+				//draw_sprite_ext(_cache_data.sprite, _cache_data.index, _cache_data.x1, _cache_data.y1, x_scale, y_scale, 0, c_white, 1);
+			}
 	    }
 	}
 	
