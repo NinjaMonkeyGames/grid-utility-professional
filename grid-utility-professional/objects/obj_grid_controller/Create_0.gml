@@ -424,7 +424,8 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
-		if tile_data != undefined then x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, column_qty); 
+		if tile_data != undefined then x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, array_length(tile_data[0])  - column_qty); 
+
 		
 		set_grid();
 	}
@@ -442,7 +443,7 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
-		if tile_data != undefined then y_shift = clamp(y_shift, LIMIT_COLUMN_SHIFT_MIN, row_qty);
+		if tile_data != undefined then y_shift = clamp(y_shift, LIMIT_COLUMN_SHIFT_MIN, array_length(tile_data)  - row_qty);
 		
 		set_grid();
 	}
