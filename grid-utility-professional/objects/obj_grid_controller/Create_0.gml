@@ -649,12 +649,13 @@ constructor
 
 		// One draw call for every outline in the grid.
 
-		vertex_submit(vbuff, pr_linelist, -1);
+		
 
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
+				
 	            var _cache_cell_data = cell_data[_row][_column];
 
 	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_x_alpha);
@@ -667,6 +668,7 @@ constructor
 				}
 			}
 	    }
+		vertex_submit(vbuff, pr_linelist, -1);
 	}
 	
 	/// @function						destroy()
