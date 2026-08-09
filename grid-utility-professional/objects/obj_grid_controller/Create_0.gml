@@ -17,10 +17,10 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 #macro  LIMIT_COLUMN_QTY_MIN 1
 #macro  LIMIT_COLUMN_QTY_MAX 128
 
-#macro LIMIT_ROW_SHIFT_MIN -9999
-#macro LIMIT_ROW_SHIFT_MAX 9999
-#macro LIMIT_COLUMN_SHIFT_MIN -9999
-#macro LIMIT_COLUMN_SHIFT_MAX 9999
+#macro LIMIT_ROW_SHIFT_MIN 0
+#macro LIMIT_ROW_SHIFT_MAX 99
+#macro LIMIT_COLUMN_SHIFT_MIN 0
+#macro LIMIT_COLUMN_SHIFT_MAX 99
 
 #macro LIMIT_X_SCALE_MIN 0.25
 #macro LIMIT_Y_SCALE_MIN 0.25
@@ -49,8 +49,8 @@ function grid
 (
 _x_offset = 32, _y_offset = 32, 
 _cell_width = 256, _cell_height = 256, 
-_row_qty = 8, _column_qty = 12, 
-_label_text_type_row = false, _label_text_type_column = true,
+_row_qty = 4, _column_qty = 6, 
+_label_text_type_row = false, _label_text_type_column = false,
 _grid_colour = c_white, _text_colour = c_white, _text_colour_selected = c_red,
 _tile_data = undefined
 )  
@@ -108,6 +108,8 @@ constructor
 	_tile_data
 	)
 	{ 
+		// CELL DATA CHHECKS
+		
 		// Data type checks
 		
 		if !is_real(_x_offset)								then throw("X_OFFSET MUST BE A NUMBER");
@@ -146,6 +148,10 @@ constructor
 		if _text_colour					< 0												||	 _text_colour					> 16777215									then throw("_TEXT_COLOUR");
 		if _text_colour_selected	< 0												||	_text_colour_selected	> 16777215									then throw("_TEXT_COLOUR_SELECTED");
 		
+		// TILE DATA CHECKS
+		
+		if _tile_data != undefined
+		{
 		var _tile_data_row_qty = array_length(_tile_data[0]);
 		var _tile_data_column_qty = array_length(_tile_data);
 		
@@ -157,7 +163,7 @@ constructor
 			{
 				var _message = undefined;
 				
-				//  Check datatypes
+				//  Datatype checks
 				
 				 _message =string("BAD SPRITE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
 				if spt_get_asset_type_as_string(_tile_data[_i][_j].sprite) != "sprite" then throw(_message);
@@ -171,7 +177,15 @@ constructor
 				_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
 				if !is_real(tile_data[_i][_j].alpha) then throw(_message);
 				
-				// Check ranges
+				// Whole number checks
+				
+				_message =string("TILE INDEX MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+				
+				_message =string("TILE ANGLE MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+				
+				// Range checks
 				
 				_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
 				if tile_data[_i][_j].index < 0 || tile_data[_i][_j].index > sprite_get_number( tile_data[_i][_j].sprite)  then throw(_message);
@@ -179,13 +193,14 @@ constructor
 				_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
 				if tile_data[_i][_j].angle < 0 || tile_data[_i][_j].angle > 359  then throw(_message);
 				
+				_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+				if tile_data[_i][_j].alpha < 0 || tile_data[_i][_j].alpha > 1  then throw(_message);
+				
+				// Minimum size check
+				
+			}
 			}
 		}
-		
-		
-	
-		
-		
 	};
 	
 	// Validate raw arguments BEFORE anything (including clamp()) touches them.
@@ -415,6 +430,8 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
+		if tile_data != undefined then x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, column_qty); 
+		
 		set_grid();
 	}
 	
@@ -431,6 +448,8 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
+		if tile_data != undefined then y_shift = clamp(y_shift, LIMIT_COLUMN_SHIFT_MIN, row_qty);
+		
 		set_grid();
 	}
 	
@@ -616,8 +635,8 @@ constructor
 		if keyboard_check_pressed(vk_up)			then shift_y(-1);
 		if keyboard_check_pressed(vk_down)	then shift_y(1);
 		
-		set_coords(); 
-		set_cursor();
+		//set_coords(); 
+		//set_cursor();
 	}
 	
 	/// @function					draw()
@@ -636,14 +655,16 @@ constructor
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-	            var _cache_data = cell_data[_row][_column];
+	            var _cache_cell_data = cell_data[_row][_column];
 
-	            draw_text_ext_colour(_cache_data.label_row_x, _cache_data.label_row_y, _cache_data.label_row_text, -1, -1, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_colour_x, _cache_data.label_text_x_alpha);
-	            draw_text_ext_colour(_cache_data.label_column_x, _cache_data.label_column_y, _cache_data.label_column_text, -1, -1, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_colour_y, _cache_data.label_text_y_alpha);
+	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_x_alpha);
+	            draw_text_ext_colour(_cache_cell_data.label_column_x, _cache_cell_data.label_column_y, _cache_cell_data.label_column_text, -1, -1, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_y_alpha);
 				
-				//var _cache_tile_data = tile_data[_row][_column];
-				
-				//draw_sprite_ext(_cache_data.sprite, _cache_data.index, _cache_data.x1, _cache_data.y1, x_scale, y_scale, 0, c_white, 1);
+				if tile_data != undefined // Prevent error trying to draw tiles that were not imported.
+				{
+					var _cache_tile_data = tile_data[_row + y_shift][_column + x_shift];
+					draw_sprite_ext(_cache_tile_data.sprite, _cache_tile_data.index, _cache_cell_data.x1, _cache_cell_data.y1, x_scale, y_scale, 0, c_white, 1);
+				}
 			}
 	    }
 	}
@@ -685,7 +706,7 @@ constructor
 		{
 			var _name = _names[_i];
 
-			if (_name == "is_destroyed")						continue;
+			if (_name == "is_destroyed")								continue;
 			if (is_method(variable_struct_get(self, _name)))	continue;
 
 			variable_struct_set(self, _name, undefined);
