@@ -249,16 +249,6 @@ constructor
 	{
 		if (is_destroyed) then throw("GRID INSTANCE HAS BEEN DESTROYED");
 	};
-
-	/// @function						clamp_shifts()
-	/// @description				Re-clamps x_shift/y_shift against the current row_qty/column_qty.
-	/// @since							v0.1.0.
-
-	static clamp_shifts = function()
-	{
-		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
-		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1			+ LIMIT_ROW_SHIFT_MAX			- row_qty);
-	}
     
     /// @function						set_grid()
     /// @description				Rebuilds the grid's vertex buffer and cell data from the current parameters.
@@ -491,7 +481,8 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-		clamp_shifts();			// row_qty changed - re-validate y_shift so labels don't go stale.
+		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
+		
 		set_grid();
 	}
 	
@@ -566,7 +557,8 @@ constructor
 			}
         }
        
-        clamp_shifts();			// row_qty/column_qty may have changed - re-validate x_shift/y_shift.
+        y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1			+ LIMIT_ROW_SHIFT_MAX			- row_qty);
+		
         set_grid();					// Rebuild the grid geometry.
 	}
 
