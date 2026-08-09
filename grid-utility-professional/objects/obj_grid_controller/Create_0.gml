@@ -68,6 +68,9 @@ constructor
 		
 	x_shift = 0;
 	y_shift = 0;
+	
+	row_qty = _row_qty;
+	column_qty = _column_qty;
 		
 	label_text_grid_gap_column = 6;
 	label_text_grid_gap_row = 12;
@@ -152,53 +155,54 @@ constructor
 		
 		if _tile_data != undefined
 		{
-		var _tile_data_row_qty = array_length(_tile_data[0]);
-		var _tile_data_column_qty = array_length(_tile_data);
+			var _tile_data_row_qty = array_length(_tile_data[0]);
+			var _tile_data_column_qty = array_length(_tile_data);
 		
-		if !is_array(_tile_data) then throw("_TILE_DATA MUST BE AN ARRAY");
+			if !is_array(_tile_data) then throw("_TILE_DATA MUST BE AN ARRAY");
 		
-		for (var _j = 0; _j < _tile_data_row_qty; ++_j) 
-		{
-		    for (var _i = 0; _i < _tile_data_column_qty; ++_i) 
+			for (var _j = 0; _j < _tile_data_row_qty; ++_j) 
 			{
-				var _message = undefined;
+			    for (var _i = 0; _i < _tile_data_column_qty; ++_i) 
+				{
+					var _message = undefined;
 				
-				//  Datatype checks
+					//  Datatype checks
 				
-				 _message =string("BAD SPRITE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if spt_get_asset_type_as_string(_tile_data[_i][_j].sprite) != "sprite" then throw(_message);
+					 _message =string("BAD SPRITE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if spt_get_asset_type_as_string(_tile_data[_i][_j].sprite) != "sprite" then throw(_message);
 				
-				_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if !is_real(tile_data[_i][_j].index) then throw(_message);
+					_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if !is_real(tile_data[_i][_j].index) then throw(_message);
 				
-				_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if !is_real(tile_data[_i][_j].angle) then throw(_message);
+					_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if !is_real(tile_data[_i][_j].angle) then throw(_message);
 				
-				_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if !is_real(tile_data[_i][_j].alpha) then throw(_message);
+					_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if !is_real(tile_data[_i][_j].alpha) then throw(_message);
 				
-				// Whole number checks
+					// Whole number checks
 				
-				_message =string("TILE INDEX MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+					_message =string("TILE INDEX MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if frac(tile_data[_i][_j].index) != 0	then throw(_message);
 				
-				_message =string("TILE ANGLE MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+					_message =string("TILE ANGLE MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if frac(tile_data[_i][_j].index) != 0	then throw(_message);
 				
-				// Range checks
+					// Range checks
 				
-				_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if tile_data[_i][_j].index < 0 || tile_data[_i][_j].index > sprite_get_number( tile_data[_i][_j].sprite)  then throw(_message);
+					_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if tile_data[_i][_j].index < 0 || tile_data[_i][_j].index > sprite_get_number( tile_data[_i][_j].sprite)  then throw(_message);
 				
-				_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if tile_data[_i][_j].angle < 0 || tile_data[_i][_j].angle > 359  then throw(_message);
+					_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if tile_data[_i][_j].angle < 0 || tile_data[_i][_j].angle > 359  then throw(_message);
 				
-				_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-				if tile_data[_i][_j].alpha < 0 || tile_data[_i][_j].alpha > 1  then throw(_message);
-				
-				// Minimum size check
-				
-			}
+					_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
+					if tile_data[_i][_j].alpha < 0 || tile_data[_i][_j].alpha > 1  then throw(_message);
+					
+					_message = "BAD_GRID_SIZE, GRID MUST NOT BE LARGER THAN TILE DATA ARRAY";
+					if row_qty > _tile_data_row_qty then throw(_message);
+
+				}
 			}
 		}
 	};
@@ -647,15 +651,10 @@ constructor
     {
 		guard_alive();
 
-		// One draw call for every outline in the grid.
-
-		
-
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-				
 	            var _cache_cell_data = cell_data[_row][_column];
 
 	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_x_alpha);
@@ -668,7 +667,8 @@ constructor
 				}
 			}
 	    }
-		vertex_submit(vbuff, pr_linelist, -1);
+		
+		vertex_submit(vbuff, pr_linelist, -1); // Effectively draw grid.
 	}
 	
 	/// @function						destroy()
