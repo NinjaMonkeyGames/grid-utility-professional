@@ -424,9 +424,7 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
-		if tile_data != undefined then x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, array_length(tile_data[0])  - column_qty); 
 
-		
 		set_grid();
 	}
 	
@@ -443,7 +441,6 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
-		if tile_data != undefined then y_shift = clamp(y_shift, LIMIT_COLUMN_SHIFT_MIN, array_length(tile_data)  - row_qty);
 		
 		set_grid();
 	}
@@ -643,7 +640,10 @@ constructor
     static draw = function() 
     {
 		guard_alive();
-
+		
+		var _tile_data_row_qty = array_length(tile_data[0]);
+		var _tile_data_column_qty = array_length(tile_data);
+			
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
@@ -655,8 +655,11 @@ constructor
 				
 				if tile_data != undefined // Prevent error trying to draw tiles that were not imported.
 				{
-					var _cache_tile_data = tile_data[_row + y_shift][_column + x_shift];
-					draw_sprite_ext(_cache_tile_data.sprite, _cache_tile_data.index, _cache_cell_data.x1, _cache_cell_data.y1, x_scale, y_scale, 0, c_white, 1);
+					if _row + y_shift < _tile_data_row_qty && _column + x_shift < _tile_data_column_qty // Prevents out of bounds error when trying to draw non existent array data.
+					{
+						var _cache_tile_data = tile_data[_row + y_shift][_column + x_shift];
+						draw_sprite_ext(_cache_tile_data.sprite, _cache_tile_data.index, _cache_cell_data.x1, _cache_cell_data.y1, x_scale, y_scale, 0, c_white, 1);
+					}
 				}
 			}
 	    }
