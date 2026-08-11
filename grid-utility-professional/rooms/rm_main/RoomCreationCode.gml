@@ -8,7 +8,7 @@ global.grid_controller = instance_create_layer(0, 0, "lyr_gui", obj_grid_control
 
 for (var _j = 0; _j < 33; ++_j) 
 {
-	for (var _i = 0; _i < 33; ++_i) 
+	for (var _i = 0; _i < 30; ++_i) 
 	{
 		tile_data[_i][_j] =
 		{

@@ -497,8 +497,8 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-		
-		clamp_shifts();	// column_qty changed - re-validate x_shift so labels don't go stale.
+		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
+	
 		set_grid();
 	}
 
