@@ -31,18 +31,18 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 /// @constructor
 /// @description																			Generates a 2D grid based on parameters.
 /// @since																						v0.1.0.
-/// @param {Real}						[_x_offset]								The horizontal starting position (origin, top-left) of the grid.
-/// @param {Real}						[_y_offset]								The vertical starting position (origin, top-left) of the grid.
-/// @param {Real}						[_cell_width]							The width of an individual grid cell in pixels or units.
-/// @param {Real}						[_cell_height]							The height of an individual grid cell in pixels or units.
-/// @param {Real}						[_row_qty]								Total number of rows.
-/// @param {Real}						[_column_qty]						Total number of columns.
+/// @param {Real}						[_x_offset]								Offset draw position (horizontal).
+/// @param {Real}						[_y_offset]								Offset draw position (vertical).
+/// @param {Real}						[_cell_width]							Width of an individual grid cell in pixels or units.
+/// @param {Real}						[_cell_height]							Height of an individual grid cell in pixels or units.
+/// @param {Real}						[_row_qty]								Number of rows to draw.
+/// @param {Real}						[_column_qty]						Number of columns to draw.
 /// @param {Bool}						[_label_text_type_row]			Whether row labels are rendered as letters (true) or numbers (false).
 /// @param {Bool}						[_label_text_type_column]	Whether column labels are rendered as letters (true) or numbers (false).
 /// @param {Constant.Colour}	[_grid_colour]						Colour of the grid lines.
-/// @param {Constant.Colour}	[_text_colour]						Default label text colour.
-/// @param {Constant.Colour}	[_text_colour_selected]		Label text colour when the row/column is under the cursor.
-/// @param {Array}						[_tile_data]								A struct containing tilemap data. (sprite, index, angle).
+/// @param {Constant.Colour}	[_text_colour]						Colour of unselected label text.
+/// @param {Constant.Colour}	[_text_colour_selected]		Colour of selected label text.
+/// @param {Array}						[_tile_data]								A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
 /// @returns {Struct}																	A new grid struct.
 
 function grid
@@ -99,9 +99,9 @@ constructor
 	/// @param {Constant.Colour}	_grid_colour							Colour of the grid lines.
 	/// @param {Constant.Colour}	_text_colour							Default label text colour.
 	/// @param {Constant.Colour}	_text_colour_selected			Label text colour when the row/column is under the cursor.
-	/// @param {Array}						[_tile_data]								A struct containing tilemap data. (sprite, index, angle).
+	/// @param {Array}						[_tile_data]								A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
 
-	static sanatise_input = function
+	static sanitise_input = function
 	(
 	_x_offset, _y_offset, 
 	_cell_width, _cell_height, 
@@ -111,7 +111,7 @@ constructor
 	_tile_data
 	)
 	{ 
-		// CELL DATA CHHECKS
+		// CELL DATA CHECKS
 		
 		// Data type checks
 		
@@ -124,7 +124,7 @@ constructor
 		if !is_real(_row_qty)								then throw("ROW_QTY MUST BE A NUMBER");
 		if !is_real(_column_qty)						then throw("COLUMN_QTY MUST BE A NUMBER");
 		
-		if !is_bool(_label_text_type_row)			then throw("LABEL TEXT TYPE ROW MUST BE BOOLEAN");
+		if !is_bool(_label_text_type_row)			then throw("LABEL TEXT TYPE ROW MUST BE A BOOLEAN");
 		if !is_bool(_label_text_type_column)	then throw("LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN");
 		
 		if !is_real(_grid_colour)							then throw("GRID COLOUR MUST BE A COLOUR");
@@ -155,53 +155,59 @@ constructor
 		
 		if _tile_data != undefined
 		{
-			var _tile_data_row_qty = array_length(_tile_data[0]);
-			var _tile_data_column_qty = array_length(_tile_data);
-		
+			// Check the container is an array BEFORE indexing into it below.
+
 			if !is_array(_tile_data) then throw("_TILE_DATA MUST BE AN ARRAY");
+
+			// _tile_data is indexed [row][column], matching cell_data and draw().
+
+			var _tile_data_row_qty = array_length(_tile_data);
+			var _tile_data_column_qty = array_length(_tile_data[0]);
+
+			// The supplied grid must not be larger than the tile data backing it.
+			// Checked once, up front, rather than repeatedly inside the nested loop below.
+
+			if row_qty > _tile_data_row_qty			then throw("BAD_GRID_SIZE, GRID MUST NOT HAVE MORE ROWS THAN TILE DATA ARRAY");
+			if column_qty > _tile_data_column_qty	then throw("BAD_GRID_SIZE, GRID MUST NOT HAVE MORE COLUMNS THAN TILE DATA ARRAY");
 		
-			for (var _j = 0; _j < _tile_data_row_qty; ++_j) 
+			for (var _row = 0; _row < _tile_data_row_qty; ++_row) 
 			{
-			    for (var _i = 0; _i < _tile_data_column_qty; ++_i) 
+			    for (var _column = 0; _column < _tile_data_column_qty; ++_column) 
 				{
 					var _message = undefined;
 				
 					//  Datatype checks
 				
-					 _message =string("BAD SPRITE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if spt_get_asset_type_as_string(_tile_data[_i][_j].sprite) != "sprite" then throw(_message);
+					 _message = string("BAD SPRITE @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if spt_get_asset_type_as_string(_tile_data[_row][_column].sprite) != "sprite" then throw(_message);
 				
-					_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if !is_real(tile_data[_i][_j].index) then throw(_message);
+					_message = string("BAD_INDEX @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if !is_real(_tile_data[_row][_column].index) then throw(_message);
 				
-					_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if !is_real(tile_data[_i][_j].angle) then throw(_message);
+					_message = string("BAD_ANGLE @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if !is_real(_tile_data[_row][_column].angle) then throw(_message);
 				
-					_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if !is_real(tile_data[_i][_j].alpha) then throw(_message);
+					_message = string("BAD_ALPHA @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if !is_real(_tile_data[_row][_column].alpha) then throw(_message);
 				
 					// Whole number checks
 				
-					_message =string("TILE INDEX MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+					_message = string("TILE INDEX MUST BE A WHOLE NUMBER @  " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if frac(_tile_data[_row][_column].index) != 0	then throw(_message);
 				
-					_message =string("TILE ANGLE MUST BE A WHOLE NUMBER @  " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if frac(tile_data[_i][_j].index) != 0	then throw(_message);
+					_message = string("TILE ANGLE MUST BE A WHOLE NUMBER @  " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if frac(_tile_data[_row][_column].angle) != 0	then throw(_message);
 				
 					// Range checks
 				
-					_message =string("BAD_INDEX @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if tile_data[_i][_j].index < 0 || tile_data[_i][_j].index > sprite_get_number( tile_data[_i][_j].sprite)  then throw(_message);
+					_message = string("BAD_INDEX @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if _tile_data[_row][_column].index < 0 || _tile_data[_row][_column].index > sprite_get_number(_tile_data[_row][_column].sprite)  then throw(_message);
 				
-					_message =string("BAD_ANGLE @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if tile_data[_i][_j].angle < 0 || tile_data[_i][_j].angle > 359  then throw(_message);
+					_message = string("BAD_ANGLE @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if _tile_data[_row][_column].angle < 0 || _tile_data[_row][_column].angle > 359  then throw(_message);
 				
-					_message =string("BAD_ALPHA @ " + string("row ") + string(_j) + string(" column ") + string(_i));
-					if tile_data[_i][_j].alpha < 0 || tile_data[_i][_j].alpha > 1  then throw(_message);
-					
-					_message = "BAD_GRID_SIZE, GRID MUST NOT BE LARGER THAN TILE DATA ARRAY";
-					if row_qty > _tile_data_row_qty then throw(_message);
-
+					_message = string("BAD_ALPHA @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					if _tile_data[_row][_column].alpha < 0 || _tile_data[_row][_column].alpha > 1  then throw(_message);
 				}
 			}
 		}
@@ -209,14 +215,14 @@ constructor
 	
 	// Validate raw arguments BEFORE anything (including clamp()) touches them.
 	
-	sanatise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected, _tile_data);
+	sanitise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected, _tile_data);
 
 	// ---- Imported variables ----
 	
     x_offset								= _x_offset;
     y_offset								= _y_offset;
 		
-    cell_width							= clamp(_cell_width , LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
+    cell_width							= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
     cell_height							= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
         
     row_qty								= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
@@ -366,15 +372,15 @@ constructor
 	                label_column_x : _label_column_x,
 	                label_column_y : _label_column_y,
 					
-					// Label colour
+					// Label colour (named to match what each one represents, not screen axis).
 					
-	                label_text_colour_x : c_white,
-	                label_text_colour_y : c_white,
+	                label_text_colour_row : c_white,
+	                label_text_colour_column : c_white,
 					
 					// Label alpha
 					
-	                label_text_x_alpha  : 1,
-	                label_text_y_alpha  : 1,
+	                label_text_row_alpha  : 1,
+	                label_text_column_alpha  : 1,
 					
 	                outline : true,
 	            };
@@ -445,9 +451,9 @@ constructor
 		set_grid();
 	}
 	
-	/// @function						set_coords()
-	/// @description				Highlights the row/column labels under the current mouse position.
-	/// @since							v0.1.0.
+	/// @function									set_coords()
+	/// @description							Highlights the row/column labels under the current mouse position.
+	/// @since										v0.1.0.
 
     static set_coords = function() 
     {
@@ -460,8 +466,8 @@ constructor
 	    {
 	        for (var _column = 0; _column < column_qty; ++_column) 
 	        {
-				cell_data[_row][_column].label_text_colour_x = (_row ==_select_y) ? text_colour_selected : text_colour;
-				cell_data[_row][_column].label_text_colour_y = (_column == _select_x) ? text_colour_selected : text_colour;
+				cell_data[_row][_column].label_text_colour_row = (_row == _select_y) ? text_colour_selected : text_colour;
+				cell_data[_row][_column].label_text_colour_column = (_column == _select_x) ? text_colour_selected : text_colour;
 			}
 		}
 	}
@@ -479,7 +485,7 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
+		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1	+ LIMIT_ROW_SHIFT_MAX	- row_qty);
 		
 		set_grid();
 	}
@@ -497,7 +503,7 @@ constructor
 		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
+		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
 	
 		set_grid();
 	}
@@ -555,6 +561,9 @@ constructor
 			}
         }
        
+        // Re-clamp both shifts against their respective (possibly changed) quantities.
+
+        x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
         y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1			+ LIMIT_ROW_SHIFT_MAX			- row_qty);
 		
         set_grid();					// Rebuild the grid geometry.
@@ -641,8 +650,16 @@ constructor
     {
 		guard_alive();
 		
-		var _tile_data_row_qty = array_length(tile_data[0]);
-		var _tile_data_column_qty = array_length(tile_data);
+		// Only inspect tile_data dimensions if tile data was actually supplied.
+
+		var _tile_data_row_qty = 0;
+		var _tile_data_column_qty = 0;
+
+		if tile_data != undefined
+		{
+			_tile_data_row_qty = array_length(tile_data);
+			_tile_data_column_qty = array_length(tile_data[0]);
+		}
 			
 	    for (var _row = 0; _row < row_qty; ++_row) 
 	    {
@@ -650,8 +667,8 @@ constructor
 	        {
 	            var _cache_cell_data = cell_data[_row][_column];
 
-	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_colour_x, _cache_cell_data.label_text_x_alpha);
-	            draw_text_ext_colour(_cache_cell_data.label_column_x, _cache_cell_data.label_column_y, _cache_cell_data.label_column_text, -1, -1, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_colour_y, _cache_cell_data.label_text_y_alpha);
+	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_row_alpha);
+	            draw_text_ext_colour(_cache_cell_data.label_column_x, _cache_cell_data.label_column_y, _cache_cell_data.label_column_text, -1, -1, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_column_alpha);
 				
 				if tile_data != undefined // Prevent error trying to draw tiles that were not imported.
 				{
