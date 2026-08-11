@@ -7,7 +7,7 @@
     "cspell": "^10.0.1",
     "markdownlint": "^0.41.0",
     "markdownlint-cli2": "^0.23.0",
-    "npm": "^11.15.0"
+    "npm": "^11.18.0"
   },
   "name": "grid-utility-professional",
   "type": "module",

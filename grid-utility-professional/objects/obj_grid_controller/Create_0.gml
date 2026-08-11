@@ -5,7 +5,7 @@
 global.grid_list = [];							// Stores array of grid structs
 global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 
-// ---- Soft limits ----
+// ---- Soft limits ---- //
 
 #macro  LIMIT_CELL_WIDTH_MIN 8
 #macro  LIMIT_CELL_WIDTH_MAX 256
@@ -56,7 +56,7 @@ _tile_data = undefined
 )  
 constructor
 {
-	// ---- Calculation variables ----
+	// ---- Calculation variables ---- //
 	
 	cell_data = []; // Initialise cell data.
 	tile_data = _tile_data;
@@ -217,7 +217,7 @@ constructor
 	
 	sanitise_input(_x_offset, _y_offset, _cell_width, _cell_height, _row_qty, _column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected, _tile_data);
 
-	// ---- Imported variables ----
+	// ---- Imported variables ---- //
 	
     x_offset								= _x_offset;
     y_offset								= _y_offset;
