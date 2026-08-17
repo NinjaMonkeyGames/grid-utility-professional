@@ -3,8 +3,8 @@
 global.test_pass = 0;
 global.test_fail = 0;
 
-/// @function						test_assert()
-/// @description				Records a pass/fail result, logs it, and quits with an error code if failed.
+/// @function				test_assert()
+/// @description			Records a pass/fail result, logs it, and quits with an error code if failed.
 /// @param {Bool}			_condition
 /// @param {String}			_label
 
@@ -24,10 +24,10 @@ function test_assert(_condition, _label)
 	}
 }
 
-/// @function                    test_expect_throw()
-/// @description               Runs _callback and asserts that it throws.
+/// @function           test_expect_throw()
+/// @description        Runs _callback and asserts that it throws.
 /// @param {Function}   _callback
-/// @param {String}        _label
+/// @param {String}     _label
 
 function test_expect_throw(_callback, _label)
 {
@@ -45,10 +45,10 @@ function test_expect_throw(_callback, _label)
 	test_assert(_threw, _label + " (expected throw)");
 }
 
-/// @function                    test_expect_no_throw()
-/// @description               Runs _callback and asserts that it does NOT throw. Returns whatever _callback returns.
+/// @function           test_expect_no_throw()
+/// @description        Runs _callback and asserts that it does NOT throw. Returns whatever _callback returns.
 /// @param {Function}   _callback
-/// @param {String}        _label
+/// @param {String}     _label
 
 function test_expect_no_throw(_callback, _label)
 {
@@ -73,6 +73,8 @@ function test_expect_no_throw(_callback, _label)
 // 1. CONSTRUCTOR - TYPE CHECKS
 // =========================================================================
 
+// Feather disable GM1029
+
 test_expect_throw(function()
 {
 	new obj_grid_controller.grid("32", 32, 64, 64, 12, 16);
@@ -85,7 +87,7 @@ test_expect_throw(function()
 
 test_expect_throw(function()
 {
-	new obj_grid_controller.grid(32, 32, [64], 64, 12, 16);
+	new obj_grid_controller.grid(32, 32, [64], 64, 12, 16); 
 }, "Constructor: cell_width as array");
 
 test_expect_throw(function()
@@ -98,6 +100,7 @@ test_expect_throw(function()
 	new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, false, false, "c_white");
 }, "Constructor: grid_colour as string");
 
+// Feather enable GM1029
 
 // =========================================================================
 // 2. CONSTRUCTOR - WHOLE NUMBER CHECKS
@@ -202,6 +205,8 @@ test_expect_throw(function()
 // 5. CONSTRUCTOR - COLOUR BOUNDARIES (0-16777215)
 // =========================================================================
 
+// Feather disable GM1029
+
 var _grid_colour_min = test_expect_no_throw(function()
 {
 	return new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, false, false, 0, 0, 0);
@@ -223,6 +228,8 @@ test_expect_throw(function()
 {
 	new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, false, false, 16777216);
 }, "Constructor: grid_colour above MAX (16777216)");
+
+// Feather enable GM1029
 
 
 // =========================================================================
@@ -313,6 +320,8 @@ test_assert(unit_test.column_qty == LIMIT_COLUMN_QTY_MIN, "update_column: column
 // 8. get_x() / get_y() - CLAMPING AT SCREEN EXTREMES
 // =========================================================================
 
+// Feather disable GM1044
+
 unit_test.destroy();
 unit_test = new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, true, false, c_white, c_white, c_red);
 
@@ -322,6 +331,7 @@ test_assert(unit_test.get_x(unit_test.x_offset + 99999) == (unit_test.column_qty
 test_assert(unit_test.get_y(unit_test.y_offset - 99999) == 0, "get_y: far-above coordinate clamps to row 0");
 test_assert(unit_test.get_y(unit_test.y_offset + 99999) == (unit_test.row_qty - 1), "get_y: far-below coordinate clamps to last row");
 
+// Feather enable GM1044
 
 // =========================================================================
 // 9. zoom() - LIMIT BOUNDARIES

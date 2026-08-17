@@ -27,23 +27,23 @@ global.grid_vformat = undefined;	// Shared vertex format for all grid instances
 #macro LIMIT_X_SCALE_MAX 2
 #macro LIMIT_Y_SCALE_MAX 2
 
-/// @function																					grid()
+/// @function															grid()
 /// @constructor
-/// @description																			Generates a 2D grid based on parameters.
-/// @since																						v0.1.0.
-/// @param {Real}						[_x_offset]								Offset draw position (horizontal).
-/// @param {Real}						[_y_offset]								Offset draw position (vertical).
-/// @param {Real}						[_cell_width]							Width of an individual grid cell in pixels or units.
-/// @param {Real}						[_cell_height]							Height of an individual grid cell in pixels or units.
-/// @param {Real}						[_row_qty]								Number of rows to draw.
-/// @param {Real}						[_column_qty]						Number of columns to draw.
-/// @param {Bool}						[_label_text_type_row]			Whether row labels are rendered as letters (true) or numbers (false).
-/// @param {Bool}						[_label_text_type_column]	Whether column labels are rendered as letters (true) or numbers (false).
-/// @param {Constant.Colour}	[_grid_colour]						Colour of the grid lines.
-/// @param {Constant.Colour}	[_text_colour]						Colour of unselected label text.
-/// @param {Constant.Colour}	[_text_colour_selected]		Colour of selected label text.
-/// @param {Array}						[_tile_data]								A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
-/// @returns {Struct}																	A new grid struct.
+/// @description														Generates a 2D grid based on parameters.
+/// @since																v0.1.0.
+/// @param {Real}				[_x_offset]								Offset draw position (horizontal).
+/// @param {Real}				[_y_offset]								Offset draw position (vertical).
+/// @param {Real}				[_cell_width]							Width of an individual grid cell in pixels or units.
+/// @param {Real}				[_cell_height]							Height of an individual grid cell in pixels or units.
+/// @param {Real}				[_row_qty]								Number of rows to draw.
+/// @param {Real}				[_column_qty]							Number of columns to draw.
+/// @param {Bool}				[_label_text_type_row]					Whether row labels are rendered as letters (true) or numbers (false).
+/// @param {Bool}				[_label_text_type_column]				Whether column labels are rendered as letters (true) or numbers (false).
+/// @param {Constant.Colour}	[_grid_colour]							Colour of the grid lines.
+/// @param {Constant.Colour}	[_text_colour]							Colour of unselected label text.
+/// @param {Constant.Colour}	[_text_colour_selected]					Colour of selected label text.
+/// @param {Array}				[_tile_data]							A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
+/// @returns {Struct}													A new grid struct.
 
 function grid
 (
@@ -85,21 +85,21 @@ constructor
 	grid_x2 = 0;
 	grid_y2 = 0;
 
-	/// @function																					sanitise_input()
-	/// @description																			Sanitises bad arguments and throws error.
-	/// @since																						v0.1.0.
-	/// @param {Real}						_x_offset								The horizontal starting position (origin, top-left) of the grid.
-	/// @param {Real}						_y_offset								The vertical starting position (origin, top-left) of the grid.
-	/// @param {Real}						_cell_width								The width of an individual grid cell in pixels or units.
-	/// @param {Real}						_cell_height							The height of an individual grid cell in pixels or units.
-	/// @param {Real}						_row_qty								Total number of rows.
-	/// @param {Real}						_column_qty							Total number of columns.
-	/// @param {Bool}						_label_text_type_row			Whether row labels are rendered as letters (true) or numbers (false).
-	/// @param {Bool}						_label_text_type_column		Whether column labels are rendered as letters (true) or numbers (false).
-	/// @param {Constant.Colour}	_grid_colour							Colour of the grid lines.
-	/// @param {Constant.Colour}	_text_colour							Default label text colour.
-	/// @param {Constant.Colour}	_text_colour_selected			Label text colour when the row/column is under the cursor.
-	/// @param {Array}						[_tile_data]								A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
+	/// @function																	sanitise_input()
+	/// @description																Sanitises bad arguments and throws error.
+	/// @since																		v0.1.0.
+	/// @param {Real}						[_x_offset]								The horizontal starting position (origin, top-left) of the grid.
+	/// @param {Real}						[_y_offset]								The vertical starting position (origin, top-left) of the grid.
+	/// @param {Real}						[_cell_width]							The width of an individual grid cell in pixels or units.
+	/// @param {Real}						[_cell_height]							The height of an individual grid cell in pixels or units.
+	/// @param {Real}						[_row_qty]								Total number of rows.
+	/// @param {Real}						[_column_qty]							Total number of columns.
+	/// @param {Bool}						[_label_text_type_row]					Whether row labels are rendered as letters (true) or numbers (false).
+	/// @param {Bool}						[_label_text_type_column]				Whether column labels are rendered as letters (true) or numbers (false).
+	/// @param {Constant.Colour}			[_grid_colour]							Colour of the grid lines.
+	/// @param {Constant.Colour}			[_text_colour]							Default label text colour.
+	/// @param {Constant.Colour}			[_text_colour_selected]					Label text colour when the row/column is under the cursor.
+	/// @param {Array}						[_tile_data]							A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
 
 	static sanitise_input = function
 	(
@@ -122,34 +122,34 @@ constructor
 		if !is_real(_cell_height)							then throw("CELL_HEIGHT MUST BE A NUMBER");
 		
 		if !is_real(_row_qty)								then throw("ROW_QTY MUST BE A NUMBER");
-		if !is_real(_column_qty)						then throw("COLUMN_QTY MUST BE A NUMBER");
+		if !is_real(_column_qty)							then throw("COLUMN_QTY MUST BE A NUMBER");
 		
-		if !is_bool(_label_text_type_row)			then throw("LABEL TEXT TYPE ROW MUST BE A BOOLEAN");
-		if !is_bool(_label_text_type_column)	then throw("LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN");
+		if !is_bool(_label_text_type_row)					then throw("LABEL TEXT TYPE ROW MUST BE A BOOLEAN");
+		if !is_bool(_label_text_type_column)				then throw("LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN");
 		
 		if !is_real(_grid_colour)							then throw("GRID COLOUR MUST BE A COLOUR");
 		if !is_real(_text_colour)							then throw("TEXT COLOUR MUST BE A COLOUR");
-		if !is_real(_text_colour_selected)			then throw("TEXT COLOUR SELECTED MUST BE A COLOUR");
+		if !is_real(_text_colour_selected)					then throw("TEXT COLOUR SELECTED MUST BE A COLOUR");
 		
 		// Whole number checks
 		
 		if frac(_cell_width) != 0							then throw("_CELL_WIDTH MUST BE A WHOLE NUMBER");
-		if frac(_cell_height) != 0						then throw("_CELL_HEIGHT MUST BE A WHOLE NUMBER");
+		if frac(_cell_height) != 0							then throw("_CELL_HEIGHT MUST BE A WHOLE NUMBER");
 		
 		if frac(_row_qty) != 0								then throw("_ROW_QTY MUST BE A WHOLE NUMBER");
-		if frac(_column_qty) != 0						then throw("_COLUMN_QTY MUST BE A WHOLE NUMBER");
+		if frac(_column_qty) != 0							then throw("_COLUMN_QTY MUST BE A WHOLE NUMBER");
 		
 		// Range checks
 		
-		if _cell_width						< LIMIT_CELL_WIDTH_MIN		||	_cell_width						>  LIMIT_CELL_WIDTH_MAX		then throw("_CELL_WIDTH");
-		if _cell_height					< LIMIT_CELL_HEIGHT_MIN		||	 _cell_height					>  LIMIT_CELL_HEIGHT_MAX		then throw("_CELL_HEIGHT");
+		if _cell_width				< LIMIT_CELL_WIDTH_MIN		||	_cell_width						>  LIMIT_CELL_WIDTH_MAX		then throw("_CELL_WIDTH");
+		if _cell_height				< LIMIT_CELL_HEIGHT_MIN		||	 _cell_height					>  LIMIT_CELL_HEIGHT_MAX	then throw("_CELL_HEIGHT");
 		
-		if _row_qty							< LIMIT_ROW_QTY_MIN			||	_row_qty						>  LIMIT_ROW_QTY_MAX				then throw("_ROW_QTY");
-		if _column_qty					< LIMIT_COLUMN_QTY_MIN	||	_column_qty					>  LIMIT_COLUMN_QTY_MAX		then throw("_COLUMN_QTY");
+		if _row_qty					< LIMIT_ROW_QTY_MIN			||	_row_qty						>  LIMIT_ROW_QTY_MAX		then throw("_ROW_QTY");
+		if _column_qty				< LIMIT_COLUMN_QTY_MIN		||	_column_qty						>  LIMIT_COLUMN_QTY_MAX		then throw("_COLUMN_QTY");
 		
-		if _grid_colour					< 0												||	_grid_colour					> 16777215									then throw("_GRID_COLOUR");
-		if _text_colour					< 0												||	 _text_colour					> 16777215									then throw("_TEXT_COLOUR");
-		if _text_colour_selected	< 0												||	_text_colour_selected	> 16777215									then throw("_TEXT_COLOUR_SELECTED");
+		if _grid_colour				< 0							||	_grid_colour					> 16777215					then throw("_GRID_COLOUR");
+		if _text_colour				< 0							||	_text_colour					> 16777215					then throw("_TEXT_COLOUR");
+		if _text_colour_selected	< 0							||	_text_colour_selected			> 16777215					then throw("_TEXT_COLOUR_SELECTED");
 		
 		// TILE DATA CHECKS
 		
@@ -172,7 +172,7 @@ constructor
 		
 			for (var _row = 0; _row < _tile_data_row_qty; ++_row) 
 			{
-			    for (var _column = 0; _column < _tile_data_column_qty; ++_column) 
+			    for (var _column = 0; _column < _tile_data_column_qty; ++_column)
 				{
 					var _message = undefined;
 				
@@ -219,21 +219,23 @@ constructor
 
 	// ---- Imported variables ---- //
 	
-    x_offset								= _x_offset;
-    y_offset								= _y_offset;
-		
-    cell_width							= clamp(_cell_width, LIMIT_CELL_WIDTH_MIN, LIMIT_CELL_WIDTH_MAX);
-    cell_height							= clamp(_cell_height, LIMIT_CELL_HEIGHT_MIN, LIMIT_CELL_HEIGHT_MAX);
-        
-    row_qty								= clamp(_row_qty, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
-    column_qty						= clamp(_column_qty, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
-        
-    grid_colour						= _grid_colour;
-    text_colour						= _text_colour;
-	text_colour_selected			= _text_colour_selected;
-		
-	label_text_type_row			= _label_text_type_row;
-	label_text_type_column	= _label_text_type_column;
+	x_offset					= /* @type {Real} */			_x_offset;
+    y_offset					= /* @type {Real} */			_y_offset;
+	
+    cell_width					= /* @type {Real} */			_cell_width;
+    cell_height					= /* @type {Real} */			_cell_height;
+	
+    row_qty						= /* @type {Real} */			_row_qty;
+    column_qty					= /* @type {Real} */			_column_qty;
+	
+    label_text_type_row			= /* @type {Bool} */			_label_text_type_row;
+    label_text_type_column		= /* @type {Bool} */			_label_text_type_column;
+	
+    grid_colour					= /* @type {Constant.Colour} */	_grid_colour;
+    text_colour					= /* @type {Constant.Colour} */	_text_colour;
+    text_colour_selected		= /* @type {Constant.Colour} */	_text_colour_selected;
+	
+    tile_data					= /* @type {Array|Undefined} */	_tile_data;
 		
 	// Build the shared vertex format once, the first time any grid is created.
 	
@@ -247,8 +249,8 @@ constructor
 	};
 
 	/// @function						guard_alive()
-	/// @description				Throws if this instance has already been destroyed. Single source of truth for the.
-	///										use-after-destroy check - call at the top of any method that reads cell_data/vbuff or mutates grid state.
+	/// @description					Throws if this instance has already been destroyed. Single source of truth for the.
+	///									use-after-destroy check - call at the top of any method that reads cell_data/vbuff or mutates grid state.
 	/// @since							v0.1.0.
 
 	static guard_alive = function()
@@ -257,7 +259,7 @@ constructor
 	};
     
     /// @function						set_grid()
-    /// @description				Rebuilds the grid's vertex buffer and cell data from the current parameters.
+    /// @description					Rebuilds the grid's vertex buffer and cell data from the current parameters.
 	/// @since							v0.1.0.
 
 	static set_grid = function()
@@ -393,35 +395,39 @@ constructor
 	
 	set_grid();
 	
-	/// @function								get_x()
-	/// @description						Gets the column index under the given X coordinate.
-	/// @since									v0.1.0.
-	/// @param	{Real}		[_x]		X coordinate to check (mouse pointer by default).
-	/// @returns	{Real}					Column index, clamped to a valid range.
-
-    static get_x = function(_x = mouse_x) 
+	/// @function						get_x()
+	/// @description					Gets the column index under the given X coordinate.
+	/// @since							v0.1.0.
+	/// @param		{Real}		[_x]	X coordinate to check (mouse pointer by default).
+	/// @returns	{Real}				Column index, clamped to a valid range.
+	/// @self		{struct.grid}
+    
+	static get_x = function(_x = mouse_x) 
     {
 		guard_alive();
 		return clamp(floor((_x - x_offset) / (cell_width * x_scale)), 0, floor(column_qty) - 1);
 	}
 	
-	/// @function								get_y()
-	/// @description						Gets the row index under the given Y coordinate.
-	/// @since									v0.1.0.
-	/// @param {Real}		[_y]		Y coordinate to check (mouse pointer by default).
-	/// @returns {Real}					Row index, clamped to a valid range.
-
+	/// @function						get_y()
+	/// @description					Gets the row index under the given Y coordinate.
+	/// @since							v0.1.0.
+	/// @param		{Real}		[_y]	Y coordinate to check (mouse pointer by default).
+	/// @returns	{Real}				Row index, clamped to a valid range.
+	/// @self		{struct.grid}
+	
+	
     static get_y = function(_y = mouse_y) 
     {
 		guard_alive();
 		return clamp(floor((_y - y_offset) / (cell_height * y_scale)), 0, floor(row_qty) - 1);
 	}
 	
-	/// @function									shift_x()
-	/// @description							Shifts columns. (Negative values shift left.)
-	/// @since										v0.1.0.
-	/// @param {Real}		_value		Amount to add to the current column shift.
-
+	/// @function						shift_x()
+	/// @description					Shifts columns. (Negative values shift left.)
+	/// @since							v0.1.0.
+	/// @param	{Real}			_value	Amount to add to the current column shift.
+	/// @self	{struct.grid}
+	
     static shift_x = function(_value) 
     {
 		guard_alive();
@@ -434,26 +440,27 @@ constructor
 		set_grid();
 	}
 	
-	/// @function									shift_y()
-	/// @description							Shifts rows. (Negative values shift up.)
-	/// @since										v0.1.0.
-	/// @param {Real}		_value		Amount to add to the current row shift.
+	/// @function						shift_y()
+	/// @description					Shifts rows. (Negative values shift up.)
+	/// @since							v0.1.0.
+	/// @param	{Real}			_value	Amount to add to the current row shift.
+	/// @self	{struct.grid}
 	
     static shift_y = function(_value) 
     {
 		guard_alive();
 
 		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
-		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
+		if frac(_value) != 0	then throw("_VALUE MUST BE A WHOLE NUMBER");
 
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
 		
 		set_grid();
 	}
 	
-	/// @function									set_coords()
-	/// @description							Highlights the row/column labels under the current mouse position.
-	/// @since										v0.1.0.
+	/// @function						set_coords()
+	/// @description					Highlights the row/column labels under the current mouse position.
+	/// @since							v0.1.0.
 
     static set_coords = function() 
     {
@@ -472,9 +479,9 @@ constructor
 		}
 	}
 	
-	/// @function									update_row()
-	/// @description							Changes the number of rows.
-	/// @since										v0.1.0.
+	/// @function						update_row()
+	/// @description					Changes the number of rows.
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Number of rows in the new grid.
 
 	static update_row = function(_value)
@@ -490,9 +497,9 @@ constructor
 		set_grid();
 	}
 	
-	/// @function									update_column()
-	/// @description							Changes the number of columns.
-	/// @since										v0.1.0.
+	/// @function						update_column()
+	/// @description					Changes the number of columns.
+	/// @since							v0.1.0.
 	/// @param {Real}		_value		Number of columns in the new grid.
 
 	static update_column = function(_value)
@@ -508,70 +515,72 @@ constructor
 		set_grid();
 	}
 
-	/// @function														zoom()
-	/// @description												Zooms in/out while preserving the grid's total on-screen size.
-	/// @since															v0.1.0.
-	/// @param {Bool}	[_zoom_direction]			True to zoom in, false to zoom out.
-
+	/// @function									zoom()
+	/// @description								Zooms in/out while preserving the grid's total on-screen size.
+	/// @since										v0.1.0.
+	/// @param	{Bool}			[_zoom_direction]	True to zoom in, false to zoom out.
+	/// @self	{struct.grid}
+	
 	static zoom = function(_zoom_direction = true)
 	{
 		guard_alive();
 
 		if is_bool(_zoom_direction) // Sanitise input to prevent an error.
 		{
-	        if _zoom_direction == false
-	        {
-	            // Zooming out: halve the scale, double the row/column quantities.
+		    if _zoom_direction == false
+		    {
+		        // Zooming out: halve the scale, double the row/column quantities.
 				
-	            var _new_x_scale	= x_scale			/ 2;
-	            var _new_y_scale	= y_scale			/ 2;
-	            var _new_col			= column_qty	* 2;
-	            var _new_row		= row_qty			* 2;
+		        var _new_x_scale	= x_scale			/ 2;
+		        var _new_y_scale	= y_scale			/ 2;
+		        var _new_col			= column_qty	* 2;
+		        var _new_row		= row_qty			* 2;
             
-	            // Check if the new state respects the absolute limits.
+		        // Check if the new state respects the absolute limits.
 				
-	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
-	                _new_col <= LIMIT_COLUMN_QTY_MAX && _new_row <= LIMIT_ROW_QTY_MAX)
-	            {
-	                x_scale			= _new_x_scale;
-	                y_scale			= _new_y_scale;
-	                column_qty	= _new_col;
-	                row_qty			= _new_row;
-	            }
-	        }
+		        if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
+		            _new_col <= LIMIT_COLUMN_QTY_MAX && _new_row <= LIMIT_ROW_QTY_MAX)
+		        {
+		            x_scale			= _new_x_scale;
+		            y_scale			= _new_y_scale;
+		            column_qty	= _new_col;
+		            row_qty			= _new_row;
+		        }
+		    }
 				else
-	        {
-	            // Zooming in: double the scale, halve the row/column quantities.
+		    {
+		        // Zooming in: double the scale, halve the row/column quantities.
 				
-	            var _new_x_scale	= x_scale						* 2;
-	            var _new_y_scale	= y_scale						* 2;
-	            var _new_col			= round(column_qty		/ 2);
-	            var _new_row		= round(row_qty			/ 2);
+		        var _new_x_scale	= x_scale				* 2;
+		        var _new_y_scale	= y_scale				* 2;
+		        var _new_col		= round(column_qty		/ 2);
+		        var _new_row		= round(row_qty			/ 2);
             
-	            // Check if the new state respects the absolute limits and won't hit zero cells.
+		        // Check if the new state respects the absolute limits and won't hit zero cells.
 				
-	            if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
-	                _new_col >= LIMIT_COLUMN_QTY_MIN && _new_row >= LIMIT_ROW_QTY_MIN)
-	            {
-	                x_scale			= _new_x_scale;
-	                y_scale			= _new_y_scale;
-	                column_qty	= _new_col;
-	                row_qty			= _new_row;
-	            }
+		        if (_new_x_scale >= LIMIT_X_SCALE_MIN && _new_x_scale <= LIMIT_X_SCALE_MAX &&
+		            _new_col >= LIMIT_COLUMN_QTY_MIN && _new_row >= LIMIT_ROW_QTY_MIN)
+		        {
+		            x_scale			= _new_x_scale;
+		            y_scale			= _new_y_scale;
+		            column_qty		= _new_col;
+		            row_qty			= _new_row;
+		        }
 			}
-        }
+	    }
        
-        // Re-clamp both shifts against their respective (possibly changed) quantities.
+	    // Re-clamp both shifts against their respective (possibly changed) quantities.
 
-        x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
-        y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1			+ LIMIT_ROW_SHIFT_MAX			- row_qty);
+	    x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1	+ LIMIT_COLUMN_SHIFT_MAX	- column_qty);
+	    y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1		+ LIMIT_ROW_SHIFT_MAX		- row_qty);
 		
-        set_grid();					// Rebuild the grid geometry.
+	    set_grid();					// Rebuild the grid geometry.
+		
 	}
 
-	/// @function					set_cursor()
+	/// @function				set_cursor()
     /// @description			Sets the mouse pointer graphic depending on whether the cursor is over the grid.
-	/// @since						v0.1.0.
+	/// @since					v0.1.0.
 	
     static set_cursor = function() 
     {
@@ -587,12 +596,13 @@ constructor
 		}
 	}
 
-	/// @function													convert_letters()
-	/// @description											Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
-	/// @since														v0.1.0.
-	/// @param               _number	{Real}			The number to convert to a letter(s).
-	/// @return								{String}		Return letter.
-
+	/// @function										convert_letters()
+	/// @description									Converts number to a letter the same way as you would see on an atlas or a spreadsheet.
+	/// @since											v0.1.0.
+	/// @param		{Real}            _number			The number to convert to a letter(s).
+	/// @return		{String}							Return letter.
+	/// @pure
+	
 	static convert_letters = function(_number)
 	{
 		if (!is_real(_number)) return undefined;
@@ -607,7 +617,7 @@ constructor
 	
 	    while (_num > 0)
 	    {
-	        _num -= 1; 
+	        _num --; 
 	        _string = chr((_num mod 26) + 65) + _string;
 	        _num = _num div 26;
 	    }
@@ -615,78 +625,82 @@ constructor
 	    return _prefix + (_string == "" ? "A" : _string);
 	}
 
-	/// @function					step()
+	/// @function				step()
     /// @description			Executes the step logic for this grid instance (input handling and state updates).
-	/// @since						v0.1.0.
+	/// @since					v0.1.0.
 	
     static step = function() 
     {
-		guard_alive();
+		with self
+		{
+			guard_alive();
 
-		if mouse_wheel_down()
-		{
-			zoom(true);
+			if mouse_wheel_down()
+			{
+				zoom(true);
+			}
+		
+			if mouse_wheel_up()
+			{
+				zoom(false);
+			}
+		
+			if keyboard_check_pressed(vk_left)		then shift_x(-1);
+			if keyboard_check_pressed(vk_right)		then shift_x(1);
+			if keyboard_check_pressed(vk_up)			then shift_y(-1);
+			if keyboard_check_pressed(vk_down)	then shift_y(1);
 		}
-		
-		if mouse_wheel_up()
-		{
-			zoom(false);
-		}
-		
-		if keyboard_check_pressed(vk_left)		then shift_x(-1);
-		if keyboard_check_pressed(vk_right)		then shift_x(1);
-		if keyboard_check_pressed(vk_up)			then shift_y(-1);
-		if keyboard_check_pressed(vk_down)	then shift_y(1);
-		
-		//set_coords(); 
-		//set_cursor();
 	}
 	
-	/// @function					draw()
+	/// @function				draw()
     /// @description			Executes the draw logic for this grid instance (grid lines and labels).
-	/// @since						v0.1.0.
+	/// @since					v0.1.0.
 	
     static draw = function() 
     {
-		guard_alive();
-		
-		// Only inspect tile_data dimensions if tile data was actually supplied.
-
-		var _tile_data_row_qty = 0;
-		var _tile_data_column_qty = 0;
-
-		if tile_data != undefined
+		with self
 		{
-			_tile_data_row_qty = array_length(tile_data);
-			_tile_data_column_qty = array_length(tile_data[0]);
-		}
-			
-	    for (var _row = 0; _row < row_qty; ++_row) 
-	    {
-	        for (var _column = 0; _column < column_qty; ++_column) 
-	        {
-	            var _cache_cell_data = cell_data[_row][_column];
+			guard_alive();
+		
+			// Only inspect tile_data dimensions if tile data was actually supplied.
 
-	            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_row_alpha);
-	            draw_text_ext_colour(_cache_cell_data.label_column_x, _cache_cell_data.label_column_y, _cache_cell_data.label_column_text, -1, -1, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_column_alpha);
+			var _tile_data_row_qty = 0;
+			var _tile_data_column_qty = 0;
+
+			if tile_data != undefined
+			{
+				_tile_data_row_qty = array_length(tile_data);
+				_tile_data_column_qty = array_length(tile_data[0]);
+			}
+			
+		    for (var _row = 0; _row < row_qty; ++_row) 
+		    {
+		        for (var _column = 0; _column < column_qty; ++_column) 
+		        {
+		            var _cache_cell_data = cell_data[_row][_column];
+
+		            draw_text_ext_colour(_cache_cell_data.label_row_x, _cache_cell_data.label_row_y, _cache_cell_data.label_row_text, -1, -1, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_colour_row, _cache_cell_data.label_text_row_alpha);
+		            draw_text_ext_colour(_cache_cell_data.label_column_x, _cache_cell_data.label_column_y, _cache_cell_data.label_column_text, -1, -1, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_colour_column, _cache_cell_data.label_text_column_alpha);
 				
-				if tile_data != undefined // Prevent error trying to draw tiles that were not imported.
-				{
-					if _row + y_shift < _tile_data_row_qty && _column + x_shift < _tile_data_column_qty // Prevents out of bounds error when trying to draw non existent array data.
+					if tile_data != undefined // Prevent error trying to draw tiles that were not imported.
 					{
-						var _cache_tile_data = tile_data[_row + y_shift][_column + x_shift];
-						draw_sprite_ext(_cache_tile_data.sprite, _cache_tile_data.index, _cache_cell_data.x1, _cache_cell_data.y1, x_scale, y_scale, 0, c_white, 1);
+						if _row + y_shift < _tile_data_row_qty && _column + x_shift < _tile_data_column_qty // Prevents out of bounds error when trying to draw non existent array data.
+						{
+							var _cache_tile_data = tile_data[_row + y_shift][_column + x_shift];
+							draw_sprite_ext(_cache_tile_data.sprite, _cache_tile_data.index, _cache_cell_data.x1, _cache_cell_data.y1, x_scale, y_scale, 0, c_white, 1);
+						}
 					}
 				}
-			}
-	    }
+		    }
 		
-		vertex_submit(vbuff, pr_linelist, -1); // Effectively draw grid.
+			vertex_submit(vbuff, pr_linelist, -1); // Effectively draw grid.
+		}
 	}
 	
-	/// @function						destroy()
+	/// @function					destroy()
 	/// @description				Removes this instance from the global grid list, frees GPU resources, and wipes all instance data.
-	/// @since							v0.1.0.
+	/// @since						v0.1.0.
+	/// @self		{struct.grid}
 	
 	static destroy = function() 
 	{
