@@ -115,41 +115,41 @@ constructor
 		
 		// Data type checks
 		
-		if !is_real(_x_offset)								then throw("X_OFFSET MUST BE A NUMBER");
-		if !is_real(_y_offset)								then throw("Y_OFFSET MUST BE A NUMBER");
+		if !is_real(_x_offset)						then throw"X_OFFSET MUST BE A NUMBER";
+		if !is_real(_y_offset)						then throw"Y_OFFSET MUST BE A NUMBER";
 		
-		if !is_real(_cell_width)							then throw("CELL_WIDTH MUST BE A NUMBER");
-		if !is_real(_cell_height)							then throw("CELL_HEIGHT MUST BE A NUMBER");
+		if !is_real(_cell_width)					then throw"CELL_WIDTH MUST BE A NUMBER";
+		if !is_real(_cell_height)					then throw"CELL_HEIGHT MUST BE A NUMBER";
 		
-		if !is_real(_row_qty)								then throw("ROW_QTY MUST BE A NUMBER");
-		if !is_real(_column_qty)							then throw("COLUMN_QTY MUST BE A NUMBER");
+		if !is_real(_row_qty)						then throw"ROW_QTY MUST BE A NUMBER";
+		if !is_real(_column_qty)					then throw"COLUMN_QTY MUST BE A NUMBER";
 		
-		if !is_bool(_label_text_type_row)					then throw("LABEL TEXT TYPE ROW MUST BE A BOOLEAN");
-		if !is_bool(_label_text_type_column)				then throw("LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN");
+		if !is_bool(_label_text_type_row)			then throw"LABEL TEXT TYPE ROW MUST BE A BOOLEAN";
+		if !is_bool(_label_text_type_column)		then throw"LABEL TEXT TYPE COLUMN MUST BE A BOOLEAN";
 		
-		if !is_real(_grid_colour)							then throw("GRID COLOUR MUST BE A COLOUR");
-		if !is_real(_text_colour)							then throw("TEXT COLOUR MUST BE A COLOUR");
-		if !is_real(_text_colour_selected)					then throw("TEXT COLOUR SELECTED MUST BE A COLOUR");
+		if !is_real(_grid_colour)					then throw"GRID COLOUR MUST BE A COLOUR";
+		if !is_real(_text_colour)					then throw"TEXT COLOUR MUST BE A COLOUR";
+		if !is_real(_text_colour_selected)			then throw"TEXT COLOUR SELECTED MUST BE A COLOUR";
 		
 		// Whole number checks
 		
-		if frac(_cell_width) != 0							then throw("_CELL_WIDTH MUST BE A WHOLE NUMBER");
-		if frac(_cell_height) != 0							then throw("_CELL_HEIGHT MUST BE A WHOLE NUMBER");
+		if frac(_cell_width)	!= 0				then throw"_CELL_WIDTH MUST BE A WHOLE NUMBER";
+		if frac(_cell_height)	!= 0				then throw"_CELL_HEIGHT MUST BE A WHOLE NUMBER";
 		
-		if frac(_row_qty) != 0								then throw("_ROW_QTY MUST BE A WHOLE NUMBER");
-		if frac(_column_qty) != 0							then throw("_COLUMN_QTY MUST BE A WHOLE NUMBER");
+		if frac(_row_qty)		!= 0				then throw"_ROW_QTY MUST BE A WHOLE NUMBER";
+		if frac(_column_qty)	!= 0				then throw"_COLUMN_QTY MUST BE A WHOLE NUMBER";
 		
 		// Range checks
 		
-		if _cell_width				< LIMIT_CELL_WIDTH_MIN		||	_cell_width						>  LIMIT_CELL_WIDTH_MAX		then throw("_CELL_WIDTH");
-		if _cell_height				< LIMIT_CELL_HEIGHT_MIN		||	 _cell_height					>  LIMIT_CELL_HEIGHT_MAX	then throw("_CELL_HEIGHT");
+		if _cell_width				< LIMIT_CELL_WIDTH_MIN		||	_cell_width				>  LIMIT_CELL_WIDTH_MAX		then throw"_CELL_WIDTH";
+		if _cell_height				< LIMIT_CELL_HEIGHT_MIN		||	 _cell_height			>  LIMIT_CELL_HEIGHT_MAX	then throw"_CELL_HEIGHT";
 		
-		if _row_qty					< LIMIT_ROW_QTY_MIN			||	_row_qty						>  LIMIT_ROW_QTY_MAX		then throw("_ROW_QTY");
-		if _column_qty				< LIMIT_COLUMN_QTY_MIN		||	_column_qty						>  LIMIT_COLUMN_QTY_MAX		then throw("_COLUMN_QTY");
+		if _row_qty					< LIMIT_ROW_QTY_MIN			||	_row_qty				>  LIMIT_ROW_QTY_MAX		then throw"_ROW_QTY";
+		if _column_qty				< LIMIT_COLUMN_QTY_MIN		||	_column_qty				>  LIMIT_COLUMN_QTY_MAX		then throw"_COLUMN_QTY";
 		
-		if _grid_colour				< 0							||	_grid_colour					> 16777215					then throw("_GRID_COLOUR");
-		if _text_colour				< 0							||	_text_colour					> 16777215					then throw("_TEXT_COLOUR");
-		if _text_colour_selected	< 0							||	_text_colour_selected			> 16777215					then throw("_TEXT_COLOUR_SELECTED");
+		if _grid_colour				< 0							||	_grid_colour			> 16777215					then throw"_GRID_COLOUR";
+		if _text_colour				< 0							||	_text_colour			> 16777215					then throw"_TEXT_COLOUR";
+		if _text_colour_selected	< 0							||	_text_colour_selected	> 16777215					then throw"_TEXT_COLOUR_SELECTED";
 		
 		// TILE DATA CHECKS
 		
@@ -157,7 +157,7 @@ constructor
 		{
 			// Check the container is an array BEFORE indexing into it below.
 
-			if !is_array(_tile_data) then throw("_TILE_DATA MUST BE AN ARRAY");
+			if !is_array(_tile_data) then throw"_TILE_DATA MUST BE AN ARRAY";
 
 			// _tile_data is indexed [row][column], matching cell_data and draw().
 
@@ -167,8 +167,8 @@ constructor
 			// The supplied grid must not be larger than the tile data backing it.
 			// Checked once, up front, rather than repeatedly inside the nested loop below.
 
-			if row_qty > _tile_data_row_qty			then throw("BAD_GRID_SIZE, GRID MUST NOT HAVE MORE ROWS THAN TILE DATA ARRAY");
-			if column_qty > _tile_data_column_qty	then throw("BAD_GRID_SIZE, GRID MUST NOT HAVE MORE COLUMNS THAN TILE DATA ARRAY");
+			if row_qty > _tile_data_row_qty			then throw"BAD_GRID_SIZE, GRID MUST NOT HAVE MORE ROWS THAN TILE DATA ARRAY";
+			if column_qty > _tile_data_column_qty	then throw"BAD_GRID_SIZE, GRID MUST NOT HAVE MORE COLUMNS THAN TILE DATA ARRAY";
 		
 			for (var _row = 0; _row < _tile_data_row_qty; ++_row) 
 			{
@@ -255,7 +255,7 @@ constructor
 
 	static guard_alive = function()
 	{
-		if (is_destroyed) then throw("GRID INSTANCE HAS BEEN DESTROYED");
+		if (is_destroyed) then throw"GRID INSTANCE HAS BEEN DESTROYED";
 	};
     
     /// @function						set_grid()
@@ -284,7 +284,7 @@ constructor
 		grid_x1 = x_offset;
 		grid_y1 = y_offset;
 		grid_x2 = x_offset + (column_qty	* cell_width	* x_scale);
-		grid_y2 = y_offset + (row_qty			* cell_height	* y_scale);
+		grid_y2 = y_offset + (row_qty		* cell_height	* y_scale);
 
 		// Horizontal lines.
 
@@ -432,8 +432,8 @@ constructor
     {
 		guard_alive();
 
-		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
-		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
+		if !is_real(_value)		then throw"_VALUE MUST BE A NUMBER";
+		if frac(_value) != 0		then throw"_VALUE MUST BE A WHOLE NUMBER";
 
 		x_shift = clamp(x_shift + _value, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
 
@@ -450,8 +450,8 @@ constructor
     {
 		guard_alive();
 
-		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
-		if frac(_value) != 0	then throw("_VALUE MUST BE A WHOLE NUMBER");
+		if !is_real(_value)		then throw"_VALUE MUST BE A NUMBER";
+		if frac(_value) != 0	then throw"_VALUE MUST BE A WHOLE NUMBER";
 
 		y_shift = clamp(y_shift + _value, LIMIT_ROW_SHIFT_MIN, 1 + LIMIT_ROW_SHIFT_MAX - row_qty);
 		
@@ -488,8 +488,8 @@ constructor
 	{
 		guard_alive();
 
-		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
-		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
+		if !is_real(_value)		then throw"_VALUE MUST BE A NUMBER";
+		if frac(_value) != 0		then throw"_VALUE MUST BE A WHOLE NUMBER";
 
 		row_qty = clamp(_value, LIMIT_ROW_QTY_MIN, LIMIT_ROW_QTY_MAX);
 		y_shift = clamp(y_shift, LIMIT_ROW_SHIFT_MIN, 1	+ LIMIT_ROW_SHIFT_MAX	- row_qty);
@@ -506,8 +506,8 @@ constructor
 	{
 		guard_alive();
 
-		if !is_real(_value)		then throw("_VALUE MUST BE A NUMBER");
-		if frac(_value) != 0		then throw("_VALUE MUST BE A WHOLE NUMBER");
+		if !is_real(_value)		then throw"_VALUE MUST BE A NUMBER";
+		if frac(_value) != 0		then throw"_VALUE MUST BE A WHOLE NUMBER";
 
 		column_qty = clamp(_value, LIMIT_COLUMN_QTY_MIN, LIMIT_COLUMN_QTY_MAX);
 		x_shift = clamp(x_shift, LIMIT_COLUMN_SHIFT_MIN, 1 + LIMIT_COLUMN_SHIFT_MAX - column_qty);
@@ -605,7 +605,7 @@ constructor
 	
 	static convert_letters = function(_number)
 	{
-		if (!is_real(_number)) return undefined;
+		if (!is_real(_number)) throw"PROVIDED PARAMETER IS NOT A REAL";
 
 	    var _val = floor(_number);
 	    var _prefix = (_val < 0) ? "-" : "";

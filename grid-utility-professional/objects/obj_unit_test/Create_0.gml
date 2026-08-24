@@ -74,6 +74,8 @@ function test_expect_no_throw(_callback, _label)
 // =========================================================================
 
 // Feather disable GM1029
+// Feather disable GM1041
+// Feather disable GM1044
 
 test_expect_throw(function()
 {
@@ -87,6 +89,7 @@ test_expect_throw(function()
 
 test_expect_throw(function()
 {
+	
 	new obj_grid_controller.grid(32, 32, [64], 64, 12, 16); 
 }, "Constructor: cell_width as array");
 
@@ -101,6 +104,8 @@ test_expect_throw(function()
 }, "Constructor: grid_colour as string");
 
 // Feather enable GM1029
+// Feather enable GM1041
+// Feather enable GM1044
 
 // =========================================================================
 // 2. CONSTRUCTOR - WHOLE NUMBER CHECKS
@@ -236,6 +241,8 @@ test_expect_throw(function()
 // 6. shift_x() / shift_y() - TYPE & WHOLE NUMBER GUARDS
 // =========================================================================
 
+// Feather disable GM1044
+
 unit_test = new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, true, false, c_white, c_white, c_red);
 
 test_expect_throw(function()
@@ -274,6 +281,7 @@ test_expect_no_throw(function()
 
 test_assert(unit_test.y_shift >= LIMIT_ROW_SHIFT_MIN, "shift_y: y_shift correctly clamped to lower bound");
 
+// Feather enable GM1044
 
 // =========================================================================
 // 7. update_row() / update_column() - TYPE, WHOLE NUMBER & CLAMP BEHAVIOUR
@@ -373,6 +381,8 @@ test_expect_no_throw(function()
 // 10. LIFECYCLE - guard_alive() / destroy()
 // =========================================================================
 
+// Feather disable GM1044
+
 unit_test.destroy();
 unit_test = new obj_grid_controller.grid(32, 32, 64, 64, 12, 16, true, false, c_white, c_white, c_red);
 
@@ -414,6 +424,7 @@ test_expect_no_throw(function()
 	unit_test.destroy(); // second destroy() call must be a safe no-op, not an error
 }, "destroy(): calling destroy() twice does not throw");
 
+// Feather enable GM1044
 
 // =========================================================================
 // SUMMARY

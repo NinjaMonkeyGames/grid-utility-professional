@@ -11,10 +11,10 @@ for (var _j = 0; _j < 33; ++_j)
 	{
 		tile_data[_i][_j] =
 		{
-			sprite : spr_jungle_temple,
-			index : round(random(30)),
-			angle : 1,
-			alpha : 1
+			sprite	: spr_jungle_temple,
+			index	: round(random(30)),
+			angle	: 1,
+			alpha	: 1
 		}
 	}
 }
