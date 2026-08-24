@@ -57,9 +57,8 @@ _tile_data = undefined
 
 constructor
 {
-	try
-	{
-		show_message(help)
+	//try
+	//{
 		// ---- Calculation variables ---- //
 	
 		cell_data = []; // Initialise cell data.
@@ -747,15 +746,15 @@ constructor
 		}
 	
 	    array_push(global.grid_list, self); // Add this instance to the global grid list.
-	}
+	//}
 	
-	catch(_exception)
-	{
-		show_message("Caught the bugger!");
-	}
+	//catch(_exception)
+	//{
+	//	show_message("Caught the bugger!");
+	//}
 	
-	finally
-	{
-		game_end(1);
-	}
+	//finally
+	//{
+	//	//game_end(1);
+	//}
 }
