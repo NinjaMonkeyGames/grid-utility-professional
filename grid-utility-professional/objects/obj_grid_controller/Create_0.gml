@@ -99,9 +99,9 @@ constructor
 		/// @param {Real}						[_column_qty]							Total number of columns.
 		/// @param {Bool}						[_label_text_type_row]					Whether row labels are rendered as letters (true) or numbers (false).
 		/// @param {Bool}						[_label_text_type_column]				Whether column labels are rendered as letters (true) or numbers (false).
-		/// @param {Constant.Colour}			[_grid_colour]							Colour of the grid lines.
-		/// @param {Constant.Colour}			[_text_colour]							Default label text colour.
-		/// @param {Constant.Colour}			[_text_colour_selected]					Label text colour when the row/column is under the cursor.
+		/// @param {Real}						[_grid_colour]							Colour of the grid lines.
+		/// @param {Real}						[_text_colour]							Default label text colour.
+		/// @param {Real}						[_text_colour_selected]					Label text colour when the row/column is under the cursor.
 		/// @param {Array}						[_tile_data]							A struct containing tilemap data, indexed [row][column]. (sprite, index, angle, alpha).
 
 		static sanitise_input = function
@@ -269,7 +269,7 @@ constructor
 		{
 			guard_alive();
 
-			cell_data = [];
+			struct_set(self,"cell_data", undefined)
 
 			// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
 		

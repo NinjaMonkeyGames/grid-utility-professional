@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"spt_grid",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"spt_grid",
+  "parent":{
+    "name":"grid-utility-professional",
+    "path":"grid-utility-professional.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
