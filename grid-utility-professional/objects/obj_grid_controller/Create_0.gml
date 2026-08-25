@@ -60,8 +60,8 @@ constructor
 	//try
 	//{
 		// ---- Calculation variables ---- //
-	
-		cell_data = []; // Initialise cell data.
+		
+		cell_data = []; 
 		tile_data = _tile_data;
 	
 		is_destroyed = false; // Set true by destroy() - guarded methods check this before running.
@@ -269,7 +269,7 @@ constructor
 		{
 			guard_alive();
 
-			struct_set(self,"cell_data", undefined)
+			cell_data = [];
 
 			// Free any previous buffer before rebuilding, otherwise each call leaks a buffer.
 		
@@ -314,6 +314,8 @@ constructor
 		    for (var _row = 0; _row < row_qty; ++_row) 
 		    {
 		        var _is_top_edge = (_row == 0); // Top row also handles column headers below.
+
+		        cell_data[_row] = array_create(column_qty);
 
 		        for (var _column = 0; _column < column_qty; ++_column) 
 		        {
@@ -731,30 +733,24 @@ constructor
 			// manual upkeep whenever a new variable is added to the constructor.
 			// Methods are left intact so guard_alive() can still fire a clean error
 			// on any call made after destruction, instead of a raw "undefined function" crash.
-
+			
+			// feather disable GM1041
+			
 			var _names = variable_struct_get_names(self);
 
 			for (var _i = 0; _i < array_length(_names); ++_i)
 			{
 				var _name = _names[_i];
 
-				if (_name == "is_destroyed")								continue;
+				if (_name == "is_destroyed")						continue;
 				if (is_method(variable_struct_get(self, _name)))	continue;
 
 				variable_struct_set(self, _name, undefined);
 			}
+			
+			// feather enable GM1041
 		}
 	
 	    array_push(global.grid_list, self); // Add this instance to the global grid list.
-	//}
-	
-	//catch(_exception)
-	//{
-	//	show_message("Caught the bugger!");
-	//}
-	
-	//finally
-	//{
-	//	//game_end(1);
-	//}
+
 }
