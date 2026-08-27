@@ -8,6 +8,8 @@ on:
       - master
       - develop
       - 'feature/**'
+      - 'release/**'
+      - 'hotfix/**'
 
 jobs:
   # 1. Detect the environment based on your branching strategy
@@ -25,9 +27,14 @@ jobs:
             echo "env=development" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == feature/** ]]; then
             echo "env=preview" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == release/** ]]; then
+            echo "env=release" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == hotfix/** ]]; then
+            echo "env=hotfix" >> $GITHUB_OUTPUT
           else
             echo "env=unknown" >> $GITHUB_OUTPUT
           fi
+
   # 2. Call the respective reusable workflows
   call-preview:
     needs: detect-environment
@@ -45,4 +52,16 @@ jobs:
     needs: detect-environment
     if: needs.detect-environment.outputs.env == 'production'
     uses: ./.github/workflows/production.yaml
+    secrets: inherit
+
+  call-release:
+    needs: detect-environment
+    if: needs.detect-environment.outputs.env == 'release'
+    uses: ./.github/workflows/release.yaml
+    secrets: inherit
+
+  call-hotfix:
+    needs: detect-environment
+    if: needs.detect-environment.outputs.env == 'hotfix'
+    uses: ./.github/workflows/hotfix.yaml
     secrets: inherit
