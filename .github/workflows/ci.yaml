@@ -46,9 +46,6 @@ jobs:
       - name: Commitlint (Latest Branch Commit)
         run: npx commitlint --config .config/commitlint.config.js --last
 
-      - name: ESLint
-        run: npx eslint . --config .config/eslint.config.js
-
   # ---------------------------------------------------------------------------
   # 2. PR & Merge Queue Checks
   # ---------------------------------------------------------------------------
@@ -86,9 +83,6 @@ jobs:
 
       - name: Markdownlint
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
-
-      - name: ESLint
-        run: npx eslint . --config .config/eslint.config.js
 
       - name: Pack NPM Package (Dry-Run Verification)
         run: npm pack --dry-run
@@ -133,9 +127,6 @@ jobs:
       - name: Markdownlint
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
 
-      - name: ESLint
-        run: npx eslint . --config .config/eslint.config.js
-
       - name: Publish Staged Package to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -170,9 +161,6 @@ jobs:
 
       - name: Markdownlint
         run: npx markdownlint-cli2 --config .config/.markdownlint-cli2.json "**/*.md"
-
-      - name: ESLint
-        run: npx eslint . --config .config/eslint.config.js
 
       - name: Semantic Release (Live Publish to NPM)
         env:

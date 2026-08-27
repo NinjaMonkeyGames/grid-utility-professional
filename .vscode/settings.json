@@ -6,15 +6,14 @@
 // 1. Automatic actions.
 // 2. Add a visible ruler to the IDE.
 // 3. Format settings.
-// 4. ESLint Configuration.
-// 5. Confirmation settings.
-// 6. Mardown settings.
-// 7. Include otherwise hidden folders in the file tree view.
-// 8. Include otherwise excluded files in the project file search.
-// 9. Start Terminal in Bash.
-// 10. Automatically format JSON files on save.
-// 11. Set commitlint config path.
-// 12. Markdown settings.
+// 4. Confirmation settings.
+// 5. Mardown settings.
+// 6. Include otherwise hidden folders in the file tree view.
+// 7. Include otherwise excluded files in the project file search.
+// 8. Start Terminal in Bash.
+// 9. Automatically format JSON files on save.
+// 10. Set commitlint config path.
+// 11. Markdown settings.
 {
   // Markdown Settings
 
@@ -45,14 +44,6 @@
 
   "editor.wrappingIndent": "same", // Keep indentation level of wrapped lines
 
-  // ESLint Configuration
-
-  "eslint.options": {
-    "overrideConfigFile": ".config/eslint.config.js"
-  },
-  "eslint.workingDirectories": [
-    { "changeProcessCWD": true, "directory": "./" }
-  ],
   // Confirmation Settings
 
   "explorer.confirmDelete": false, // Prevents prompt when deleting files
