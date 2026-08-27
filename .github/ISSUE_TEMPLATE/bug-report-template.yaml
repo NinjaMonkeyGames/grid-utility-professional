@@ -89,6 +89,7 @@ body:
       options:
         - Application Bug
         - Documentation Problem
+        - CI/CD
     validations:
       required: true 
 
