@@ -1,8 +1,10 @@
-/// @function											spt_get_asset_type_as_string()
-/// @description										Returns asset type as string.
-/// @since												v1.0.0.
-/// @param		{String}				_asset_name		Name of asset in string form.
-/// @returns	{String}				_string			Asset type description.
+/**
+ * @function spt_get_asset_type_as_string()
+ * @description Returns asset type as string.
+ * @since v1.0.0.
+ * @param	{String} _asset_name Name of asset in string form.
+ * @returns {String} _string Asset type description.
+ */
 
 function spt_get_asset_type_as_string(_asset_name)
 {
