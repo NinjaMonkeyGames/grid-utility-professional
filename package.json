@@ -6,7 +6,6 @@
     "eslint-plugin-jsdoc": "^63.3.3"
   },
   "devDependencies": {
-    "@bscotch/gml-parser": "^1.17.2",
     "@commitlint/config-conventional": "^20.3.0",
     "@eslint/js": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
