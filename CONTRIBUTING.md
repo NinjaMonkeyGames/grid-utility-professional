@@ -69,17 +69,16 @@ practices when working with an NinjaMonkeyGames project.
   - **Draw Events:** The Draw event must be reserved exclusively for rendering/drawing commands. It is strictly
     prohibited to place game logic, state calculations, or data processing within any Draw event.
 
+    ℹ️ **One exception to this rule is for toggling draw on or off.**
+
 ## 4. Expressions & Assignment
 
 - **No Magic Numbers:** Do not use literal numeric constants in game logic. Replace them with named
 constants using `const` or `#macro` (e.g., `#macro SPEED_MAX 120`).
-- **No In-Place Mutation:** A calculation must not mutate a source operand within the same expression.
-  - *Bad:* `_x += _dx;`
-  - *Good:* `var _next_x = _x + _dx; _x = _next_x;`
 - **Side-Effect Prohibition:** Avoid side effects within expressions (e.g., `arr[i] += val`
 or calling functions inside larger expressions).
 - **Object Instantiation:** All `new` calls must be assigned to a variable immediately. Anonymous instantiation is
-- prohibited.
+  prohibited.
   - *Bad:* `new Player();`
   - *Good:* `var _player = new Player();`
 - **Respect datatype structure:** Example: Do not use 1 in place of True nor 0 in place of False.
@@ -89,7 +88,7 @@ or calling functions inside larger expressions).
 - **JSDoc:** All functions must use the GameMaker JSDoc system for documentation.
 - **JSDoc Extended:** please use @since and @version JSDoc tags for functions even though GameMaker does not parse them
   yet. It still helps with traceability and debugging.
-- **Annotations:** Explicitly mark functions with `@pure` or `@void` tags where applicable.
+- **Annotations:** Explicitly mark functions with `@pure` tags where applicable.
 - optimisation and code clarity.
 - Comment Philosophy: "Comments should explain the intent ('Why' this is done) rather than the mechanics
 - ('What' the code does), as the code itself should be self-documenting through clear variable naming."
@@ -102,6 +101,7 @@ up in the corresponding CleanUp event. Always check if (ds_exists(_data, ds_type
 ## 7. Commit & CI Rules
 
 - **Signed Commits:** All commits must be signed with a GPG key.
+- **gm-cli:** gm-cli is used to run unit tests and compile in CI.
 - **Markdownlint** Markdownlint is used to ensure formatting consistency within the projects markdown documents.
 - **Commitlint** All commit messages must be conventional commits compliant. This is checked with commitlint but
 - You must also make sure all your commit messages are compliant.
@@ -112,11 +112,12 @@ up in the corresponding CleanUp event. Always check if (ds_exists(_data, ds_type
 #### 1. The principle of defensive programming
 
 - **All functions must be internally sanitised. This means they should be able to robustly handle any input
-  without causing an exception:**
+  without causing an unhandled exception:**
 
 #### 2. The principle of modularity
 
-- **All code must be written with the view to reuse it. Code must be written in small discreet units.**
+- **All code must be written with the view to reuse it. Code must be written in small discreet units.
+Model-View-Controller (MVC) Pattern**
 
 #### 3. The principle of DRY code
 
@@ -125,7 +126,14 @@ up in the corresponding CleanUp event. Always check if (ds_exists(_data, ds_type
   - DRY code is fast code.
   - DRY code is readable code.
   - DRY code is efficient code.
+  - DRY code is professional code.
   - DRY code is happy code.
+
+  - WET code is ugly code.
+  - WET code is slow code.
+  - WET code is not pretty code.
+  - WET code is inefficient code.
+  - WET code is SAD code.
 
 #### 4. The principle of human readable code
 
