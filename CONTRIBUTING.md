@@ -17,11 +17,6 @@ practices when working with an NinjaMonkeyGames project.
       - [2. The principle of modularity](#2-the-principle-of-modularity)
       - [3. The principle of DRY code](#3-the-principle-of-dry-code)
       - [4. The principle of human readable code](#4-the-principle-of-human-readable-code)
-  - [USEFUL COMMANDS](#useful-commands)
-    - [STAGE ALL CHANGES](#stage-all-changes)
-    - [COMMIT CHANGES](#commit-changes)
-    - [PUSH REFS](#push-refs)
-    - [RESET WORKSPACE BACK TO LAST COMMIT](#reset-workspace-back-to-last-commit)
   - [CODE SANITY CHECKS](#code-sanity-checks)
   - [CONTACT INFORMATION](#contact-information)
   - [COPYRIGHT](#copyright)
@@ -138,32 +133,6 @@ Model-View-Controller (MVC) Pattern**
 #### 4. The principle of human readable code
 
 - **Micro optimisations should not come at the expense of clean human readable code.**
-
-## USEFUL COMMANDS
-
-### STAGE ALL CHANGES
-
-```bash
-git add .
-```
-
-### COMMIT CHANGES
-
-```bash
-git commit --file .git/COMMIT_EDITMSG
-```
-
-### PUSH REFS
-
-```bash
-git push .
-```
-
-### RESET WORKSPACE BACK TO LAST COMMIT
-
-```bash
-git reset --hard HEAD
-```
 
 ## CODE SANITY CHECKS
 
