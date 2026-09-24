@@ -1,79 +1,66 @@
-# README
+# GAMEMAKER PROJECT TEMPLATE
 
 <!-- markdownlint-disable MD013 -->
-[![Commitlint](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml/badge.svg)](https://github.com/NinjaMonkeyGames/grid-utility-professional/actions/workflows/ci.yaml)
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
 ![Signed Commits](https://img.shields.io/badge/commits-signed-blue.svg)
 ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
-![GitHub Release](https://img.shields.io/github/v/release/NinjaMonkeyGames/grid-utility-professional)
-
+![GitHub Release](https://img.shields.io/github/v/release/NinjaMonkeyGames/gamemaker-project-template)
+<!-- markdownlint-enable MD013 -->
 ---
 
 ## TABLE OF CONTENTS
 
-- [README](#readme)
+- [GAMEMAKER PROJECT TEMPLATE](#gamemaker-project-template)
   - [TABLE OF CONTENTS](#table-of-contents)
-  - [WHAT IS THIS REPOSITORY FOR ?](#what-is-this-repository-for-)
+  - [SUMMERY DESCRIPTION](#summery-description)
   - [WHAT IS THE PURPOSE OF THIS PROJECT ?](#what-is-the-purpose-of-this-project-)
   - [WHO IS THIS REPOSITORY FOR ?](#who-is-this-repository-for-)
   - [QUICKSTART](#quickstart)
   - [API OVERVIEW](#api-overview)
   - [ENVIRONMENT DEPENDENCY MANIFESTO](#environment-dependency-manifesto)
+    - [GAMEMAKER](#gamemaker)
     - [IDE](#ide)
       - [VSC (Visual Studio Codium)](#vsc-visual-studio-codium)
-        - [VSC EXTENSIONS](#vsc-extensions)
+      - [VSC EXTENSIONS](#vsc-extensions)
     - [CI TOOLS](#ci-tools)
+    - [CI TOOL PLUGINS](#ci-tool-plugins)
     - [SUPPORTING TOOLS](#supporting-tools)
+  - [INSTALLATION](#installation)
+  - [USAGE](#usage)
+  - [SUPPORTING DOCUMENTATION](#supporting-documentation)
+  - [KNOWN ISSUES](#known-issues)
   - [CONTACT INFORMATION](#contact-information)
   - [COPYRIGHT](#copyright)
 
 ---
 
-<!-- markdownlint-enable MD013 -->
+## SUMMERY DESCRIPTION
 
----
-
-## WHAT IS THIS REPOSITORY FOR ?
-
-This repository contains a GameMaker Studio 2 project. This project is effectively a constructor that allows you to
-easily create 2D grids on-the-fly.
+Replace this with a short description of what the project is...
 
 ---
 
 ## WHAT IS THE PURPOSE OF THIS PROJECT ?
 
-To speed up future production time by providing a utility that is easily reusable.
+The purpose of this project is...
 
 ---
 
 ## WHO IS THIS REPOSITORY FOR ?
 
-This project is for anyone who has a use for the code in this project.
+This project is for anyone who...
 
 ---
 
 ## QUICKSTART
 
-Create a new grid instance with `grid()`. Every parameter has a default, so the simplest possible call is:
-
-```gml
-grid_instance = new grid();
-```
-
-To configure it, pass positional arguments in order (`_x_offset, _y_offset, _cell_width, _cell_height, _row_qty,
-_column_qty, _label_text_type_row, _label_text_type_column, _grid_colour, _text_colour, _text_colour_selected,
-_tile_data`), for example:
-
-```gml
-grid_instance = new grid(32, 32, 256, 256, 4, 6, false, false, c_white, c_white, c_red);
-```
-
-Call `grid_instance.draw()` in a Draw event and `grid_instance.step()` in a Step event to enable mouse-wheel
-zoom and arrow-key panning out of the box. See `DEVELOPER.md` for full details.
+Quickstart information here...
 
 ---
 
 ## API OVERVIEW
+
+Example, replace with relivenet API information.
 
 | Method                    | Description                                                                 |
 |---------------------------|-----------------------------------------------------------------------------|
@@ -90,11 +77,13 @@ zoom and arrow-key panning out of the box. See `DEVELOPER.md` for full details.
 | `draw()`                  | Draws the grid lines, labels, and any tile data.                            |
 | `destroy()`               | Frees GPU resources and removes the instance from `global.grid_list`.       |
 
-All row/column counts, cell sizes, shifts, and scale factors are clamped to soft limits defined near the top of the
-script (`LIMIT_ROW_QTY_MAX`, `LIMIT_CELL_WIDTH_MAX`, `LIMIT_X_SCALE_MAX`, etc.) — adjust those macros if you need a
-larger or smaller working range.
-
 ## ENVIRONMENT DEPENDENCY MANIFESTO
+
+### GAMEMAKER
+
+- GameMaker version: `2026.0.0.16`
+- Runtime version: `2026.0.0.23`
+- Target platforms: Windows, Linux
 
 ### IDE
 
@@ -108,33 +97,65 @@ ElectronBuildId: undefined
 Chromium: 142.0.7444.265
 Node.js: 22.22.1
 V8: 14.2.231.22-electron.0
-OS: Linux x64 6.12.96+deb13-amd64
+OS: Linux x64 6.12.105+deb13-amd64
 
-##### VSC EXTENSIONS
+#### VSC EXTENSIONS
 
 | Extension Name                                                    | Version   |
 | ----------------------------------------------------------------- | --------- |
-| streetsidesoftware.code-spell-checker                             | 4.5.6     |
-| streetsidesoftware.code-spell-checker-cspell-bundled-dictionaries | 2.0.14    |
+| streetsidesoftware.code-spell-checker                             | 4.7.3     |
+| streetsidesoftware.code-spell-checker-cspell-bundled-dictionaries | 2.0.15    |
 | github.vscode-github-actions                                      | 0.32.3    |
+| dbaeumer.vscode-eslint                                            | 3.0.34    |
 | yzhang.markdown-all-in-one                                        | 3.6.2     |
 | davidanson.vscode-markdownlint                                    | 0.62.1    |
 | redhat.vscode-yaml                                                | 1.24.0    |
 | joshbolduc.commitlint                                             | 2.6.3     |
+| timonwong.shellcheck                                              | 0.40.0    |
 
 ### CI TOOLS
-
-Tools versions used by CI and by extension the Dockerfile.
 
 | Tool                                  | Version                           |
 |---------------------------------------|-----------------------------------|
 | npm                                   | 11.18.0                           |
-| cSpell                                | 11.6.2                            |
+| cSpell                                | 10.3.0                            |
+| eslint                                | 10.11.0                           |
 | Markdownlint-Cli2                     | 0.23.0                            |
 | Markdownlint                          | 0.41.0                            |
-| Commitlint                            | 21.2.1                            |
-| Commitlint config-conventional        | 20.3.0                            |
-| gm-cli                                | 2.2.0                             |
+| Commitlint                            | 21.2.2                            |
+| Commitlint config-conventional        | 21.2.2                            |
+| gm-cli                                | 2.3.0                             |
+| cSpell                                | 10.3.0                            |
+| semantic-release                      | 25.0.9                            |
+
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^12.0.9",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+
+    "eslint": "^10.11.0",
+    "eslint-plugin-jsdoc": "^63.3.3",
+    "eslint-plugin-json-schema-validator": "^6.3.1",
+    "eslint-plugin-jsonc": "^3.4.2",
+    "globals": "^17.12.0",
+    "i": "^0.3.7",
+    "jsonc-eslint-parser": "^3.3.0",
+
+### CI TOOL PLUGINS
+
+| Tool                                      | Version                           |
+|-------------------------------------------|-----------------------------------|
+| @semantic-release/changelog               | 7.0.0                             |
+| @semantic-release/commit-analyzer         | 13.0.1                            |
+| @semantic-release/github                  | 12.0.9                            |
+| @semantic-release/npm                     | 13.1.5                            |
+| @semantic-release/release-notes-generator | 14.1.1                            |
+| eslint-plugin-jsdoc                       | 63.3.3                            |
+| eslint-plugin-json-schema-validator       | 6.3.1                             |
+| eslint-plugin-jsonc                       | 3.4.2                             |
+| jsonc-eslint-parser                       | 3.3.0                             |
+| globals                                   | 0.3.7                             |
 
 ### SUPPORTING TOOLS
 
@@ -147,13 +168,36 @@ Local tool versions.
 | GitHub Desktop                 | 3.4.9-linux1 (x64)    |
 | Git                            | 2.47.3-0+deb13u1      |
 
+## INSTALLATION
+
+1. Clone the repository.
+2. Open `project-name.yyp` in GameMaker.
+3. Open the demo room.
+4. Run the project using the target platform of your choice.
+
+## USAGE
+
+Provide example API usage examples here...
+
+## SUPPORTING DOCUMENTATION
+
+- CONTRIBUTING.md
+- CHANGELOG.md
+- DEVELOPER.md
+- LICENSE.md
+- README.md
+
+## KNOWN ISSUES
+
+There are currently no known limitations or bugs...
+
 ## CONTACT INFORMATION
 
 Author: Daniel Mallett (Monkey Knuckles)
 
-If you have any problems with the repository or have any suggestions please contact us at <info@ninjamonkeygames.com>.
+If you have any problems with the repository or have any suggestions please contact us at <info@NinjaMonkeyGames.com>.
 
-You may also contact us via our [website](https://ninjamonkeygames.com).
+You may also contact us via our [website](https://NinjaMonkeyGames.com).
 
 Any bugs should be raised as an [issue](https://github.com/NinjaMonkeyGames/grid-utility-professional/issues) on
 GitHub.
