@@ -206,6 +206,15 @@
         "dbaeumer",
         "analyzer"
       ]
+    },
+    {
+      "filename": "DEVELOPER.md",
+      "words": [
+        "vbuff",
+        "vformat",
+        "handpoint",
+        "linelist"
+      ]
     }
   ],
   "version": "0.2",
