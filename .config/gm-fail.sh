@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Allows Gamemaker to exit gracefully
+
 LOG_FILE="$1"
 
 if [ -z "$LOG_FILE" ] || [ ! -f "$LOG_FILE" ]; then
@@ -8,6 +10,7 @@ if [ -z "$LOG_FILE" ] || [ ! -f "$LOG_FILE" ]; then
 fi
 
 # Search for [FAIL] in the verbose output log
+
 if grep -q "\[FAIL\]" "$LOG_FILE"; then
   echo "Test failure detected [FAIL] found in output."
   exit 1
