@@ -42,6 +42,7 @@ Provides a 2D grid object that can be generated on-the-fly with the `new` keywor
 - Zoom.
 - Pan.
 - Set coordinate text colour.
+- Set grid line colour.
 - Set grid size.
 - Set grid location.
 - Import tile data.
@@ -52,7 +53,7 @@ Provides a 2D grid object that can be generated on-the-fly with the `new` keywor
 
 ## WHAT IS THE PURPOSE OF THIS PROJECT ?
 
-The purpose of this project is to provide a simple way to generate 2D grids on-the-fly.
+The purpose of this project is to provide a simple way to generate 2D grids on-the-fly in GameMaker Studio 2.
 
 ---
 

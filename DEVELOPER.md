@@ -2,7 +2,6 @@
 
 - [DEVELOPER](#developer)
   - [Developer Documentation](#developer-documentation)
-  - [How to Use This Guide](#how-to-use-this-guide)
   - [HIGH LEVEL OVERVIEW](#high-level-overview)
   - [1. Architecture Overview](#1-architecture-overview)
     - [Event wiring](#event-wiring)
@@ -30,10 +29,6 @@ codebase organisation.
 
 *Note: Please refer to the **[CONTRIBUTING.md](CONTRIBUTING.md)** for information regarding coding style, pull request
 processes, and commit message conventions.*
-
-## How to Use This Guide
-
-PLACEHOLDER
 
 ## HIGH LEVEL OVERVIEW
 
