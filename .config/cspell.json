@@ -215,6 +215,12 @@
         "handpoint",
         "linelist"
       ]
+    },
+    {
+      "filename": ".github/workflows/close-referenced-issues.yaml",
+      "words": [
+        "esac"
+      ]
     }
   ],
   "version": "0.2",
