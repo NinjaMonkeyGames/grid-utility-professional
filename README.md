@@ -1,4 +1,4 @@
-# GAMEMAKER PROJECT TEMPLATE
+# GRID UTILITY PROFESSIONAL
 
 <!-- markdownlint-disable MD013 -->
 [![Common Changelog](https://common-changelog.org/badge.svg)](https://common-changelog.org)
@@ -10,7 +10,7 @@
 
 ## TABLE OF CONTENTS
 
-- [GAMEMAKER PROJECT TEMPLATE](#gamemaker-project-template)
+- [GRID UTILITY PROFESSIONAL](#grid-utility-professional)
   - [TABLE OF CONTENTS](#table-of-contents)
   - [SUMMERY DESCRIPTION](#summery-description)
   - [WHAT IS THE PURPOSE OF THIS PROJECT ?](#what-is-the-purpose-of-this-project-)

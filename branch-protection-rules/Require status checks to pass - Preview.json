@@ -3,7 +3,7 @@
   "name": "Require status checks to pass - Preview",
   "target": "branch",
   "source_type": "Repository",
-  "source": "NinjaMonkeyGames/gamemaker-project-template",
+  "source": "NinjaMonkeyGames/grid-utility-professional",
   "enforcement": "active",
   "conditions": {
     "ref_name": {

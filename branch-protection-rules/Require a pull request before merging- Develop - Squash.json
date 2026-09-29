@@ -3,7 +3,7 @@
   "name": "Require a pull request before merging- Develop - Squash",
   "target": "branch",
   "source_type": "Repository",
-  "source": "NinjaMonkeyGames/gamemaker-project-template",
+  "source": "NinjaMonkeyGames/grid-utility-professional",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
