@@ -39,7 +39,7 @@
   ],
   "license": "GPL-3.0",
   "main": "index.js",
-  "name": "sandbox-test",
+  "name": "grid-utility-professional",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NinjaMonkeyGames/grid-utility-professional.git"
