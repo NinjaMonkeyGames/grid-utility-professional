@@ -42,7 +42,7 @@ global.controller = id;
  * @function grid()
  * @constructor
  * @description Generates a 2D grid based on parameters.
- * @since v0.1.0.
+ * @since v0.1.0
  * @param	{Real}				[_x_offset]					Offset draw position (horizontal).
  * @param	{Real}				[_y_offset]					Offset draw position (vertical).
  * @param	{Real}				[_cell_width]				Width of an individual grid cell in pixels or units.
@@ -82,12 +82,17 @@ constructor
 	
 	row_qty = _row_qty;
 	column_qty = _column_qty;
-		
+	
 	label_text_grid_gap_column = 6;
 	label_text_grid_gap_row = 12;
 
 	vbuff = -1;
 	cache_cursor = window_get_cursor();
+
+	// FIX: Declared here with an explicit type. Populated by set_grid(), indexed [row][column].
+
+	/// @type {Array<Array<Struct>>}
+	cell_data = [];
 
 	// Vertex boundary cache (populated by set_grid), declared here for discoverability.
 
@@ -207,7 +212,7 @@ constructor
 				
 					//  Datatype checks
 				
-						_message = string("BAD SPRITE @ " + string("row ") + string(_row) + string(" column ") + string(_column));
+					_message = string("BAD SPRITE @ " + string("row ") + string(_row) + string(" column ") + string(_column));
 					if spt_get_asset_type_as_string(_tile_data[_row][_column].sprite) != "sprite" then throw(_message);
 				
 					_message = string("BAD_INDEX @ " + string("row ") + string(_row) + string(" column ") + string(_column));
@@ -341,10 +346,15 @@ constructor
 		
 		// Build grid cells.
 		
-		cell_data = array_create(0); // Initialise as array up front to avoid feather warning.
+		// FIX: No chained indexed writes (x[_row][_column] = {...}). Each row is built as its own
+		// array of structs with array_push, then pushed into the outer array. cell_data is only
+		// assigned once the whole thing is complete.
+		
+		var _new_cell_data = [];
 		
 		for (var _row = 0; _row < row_qty; ++_row) 
 		{
+		    var _row_cells = [];
 		    var _is_top_edge = (_row == 0); // Top row also handles column headers below.
 
 		    for (var _column = 0; _column < column_qty; ++_column) 
@@ -389,7 +399,7 @@ constructor
 				
 		        // Store cell data.
 	
-		        cell_data[_row][_column] =
+		        var _cell =
 		        {
 		            x1 : _x1,
 					y1 : _y1,
@@ -419,14 +429,21 @@ constructor
 					
 		            outline : true,
 		        };
+		        
+		        array_push(_row_cells, _cell);
 		    }
+		    
+		    array_push(_new_cell_data, _row_cells);
 		}
+
+		cell_data = _new_cell_data;
 
 		vertex_end(vbuff);
 		vertex_freeze(vbuff); // Static geometry until the next set_grid() call, so freezing is safe and gives a GPU-side speed boost.
 	}
 	
-	set_grid();
+	// NOTE: set_grid() is called at the bottom of the constructor, after every static method
+	// it depends on (e.g. convert_letters) has been defined.
 	
 	/**
 	 * @function get_x()
@@ -523,8 +540,13 @@ constructor
 		{
 		    for (var _column = 0; _column < column_qty; ++_column) 
 		    {
-				cell_data[_row][_column].label_text_colour_row = (_row == _select_y) ? text_colour_selected : text_colour;
-				cell_data[_row][_column].label_text_colour_column = (_column == _select_x) ? text_colour_selected : text_colour;
+				// FIX: Grab the cell struct into a local, then write through it, instead of a
+				// chained cell_data[_row][_column].field = ... write.
+				
+				var _cell = cell_data[_row][_column];
+				
+				_cell.label_text_colour_row = (_row == _select_y) ? text_colour_selected : text_colour;
+				_cell.label_text_colour_column = (_column == _select_x) ? text_colour_selected : text_colour;
 			}
 		}
 	}
@@ -813,8 +835,6 @@ constructor
 
 		is_destroyed = true; // Set before the generic wipe below, since the wipe would otherwise erase it too.
 			
-		// feather disable GM1041
-			
 		var _names = variable_struct_get_names(self);
 
 		for (var _i = 0; _i < array_length(_names); ++_i)
@@ -826,9 +846,9 @@ constructor
 
 			variable_struct_set(self, _name, undefined);
 		}
-			
-		// feather enable GM1041
 	}
+	
+	set_grid();
 	
 	array_push(global.grid_list, self); // Add this instance to the global grid list.
 
